@@ -12,6 +12,7 @@ num_cars_month <- 4000
 library(dplyr)
 cities_mytop50 <- cities_raw %>% 
   arrange(desc(Population)) %>% # sort Tibble by Population and descending
+  #slice_head(n = 11) %>% # Get only the first n rows.
   mutate(freq = Population / sum(Population)) %>% # percent of Population
   mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
 
@@ -47,8 +48,11 @@ distances <- tibble(from=character(0),to=character(0),distance=numeric(0),
                       from_population=numeric(0),from_pop_ratio=numeric(0),
                       from_num_cars=numeric(0),to_population=numeric(0),
                       to_pop_ratio=numeric(0),to_num_cars=numeric(0))
+# Set from and to as vector of cities
+from <- cities_top10$`City, State`
+to <- cities_top10$`City, State`
 # For loop to calculate distances between each city combination
-x <- 1
+x <- 1 # Set initial x value
 for (i in 1:length(from)){
   for (j in 1:length(to)){
     if (i == j){
@@ -73,4 +77,42 @@ for (i in 1:length(from)){
 
 # Save to .csv file
 write_csv(distances,"distances_top_10.csv")
+
+
+#### Compute Distance for My Top 50 Cities and save ####
+
+# Create empty Tibble with 9 columns
+distances <- tibble(from=character(0),to=character(0),distance=numeric(0),
+                    from_population=numeric(0),from_pop_ratio=numeric(0),
+                    from_num_cars=numeric(0),to_population=numeric(0),
+                    to_pop_ratio=numeric(0),to_num_cars=numeric(0))
+# set from and to as list of cities
+from <- cities_mytop50$`City, State`
+to <- cities_mytop50$`City, State`
+# For loop to calculate distances between each city combination
+x <- 1
+for (i in 1:length(from)){
+  for (j in 1:length(to)){
+    if (i == j){
+      # If city == city, then skip as distance will be 0.
+      next
+    }
+    #k <- mapdist(from[i],to[j])[5]
+    ### Important, mapdist returns a Tibble w/ 9 columns.
+    ### The fifth value has miles.
+    distances[x,1] <- from[i] # Add name of "from" city
+    distances[x,2] <- to[j] # Add name of "to" city
+    distances[x,3] <- mapdist(from[i],to[j])[5] # Add calcuated distance
+    distances[x,4] <- cities_mytop50$Population[i] # Add "from" population
+    distances[x,5] <- cities_mytop50$freq[i] # Add "from" population ratio
+    distances[x,6] <- cities_mytop50$num_cars[i] #Add "from" number of cars moving each month
+    distances[x,7] <- cities_mytop50$Population[j] # Add "to" population
+    distances[x,8] <- cities_mytop50$freq[j] # Add "to" population ratio
+    distances[x,9] <- cities_mytop50$num_cars[j] #Add "to" number of cars moving each month
+    x <- x + 1 # go to next row in Tibble
+  }
+}
+
+# Save to .csv file
+write_csv(distances,"distances_my_top_50.csv")
 

@@ -34,7 +34,7 @@ cities_top10 <- cities %>%
   arrange(desc(Population)) %>% # sort Tibble by Population and descending
   slice_head(n = 10) %>% # Get only the first n rows.
   mutate(freq = Population / sum(Population)) %>% # percent of Population
-  mutate(num_cars = round(freq * num_cars_month,0))
+  mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
 
 # Create empty Tibble with 9 columns
 distances <- tibble(from=character(0),to=character(0),distance=numeric(0),
@@ -56,13 +56,17 @@ for (i in 1:length(from)){
     distances[x,2] <- to[j] # Add name of "to" city
     distances[x,3] <- mapdist(from[i],to[j])[5] # Add calcuated distance
     distances[x,4] <- cities_top10$Population[i] # Add "from" population
-    distances[x,5] <- cities_top10$freq[i]
-    distances[x,6] <- cities_top10$num_cars[i]
+    distances[x,5] <- cities_top10$freq[i] # Add "from" population ratio
+    distances[x,6] <- cities_top10$num_cars[i] #Add "from" number of cars moving each month
     distances[x,7] <- cities_top10$Population[j] # Add "to" population
-    distances[x,8] <- cities_top10$freq[j]
-    distances[x,9] <- cities_top10$num_cars[j]
+    distances[x,8] <- cities_top10$freq[j] # Add "to" population ratio
+    distances[x,9] <- cities_top10$num_cars[j] #Add "to" number of cars moving each month
     x <- x + 1 # go to next row in Tibble
   }
 }
+
+# Save to .csv file
+write_csv(distances,"distances_top_10.csv")
+
 
 ### Add 

@@ -2,15 +2,31 @@
 library(readr)
 library(tidyr)
 # Read in .csv file and create Tibble DF.
-cities <- read_csv("my_top_50.csv")
+cities_raw <- read_csv("my_top_50.csv")
 
+#### Mutate Data ####
+# Organize by descending Population
+# Get percent of Population by city from total Population.
+# If 4,000 cars bought and sold and moving per month, with a ratio by Population, calc cars by city.
+num_cars_month <- 4000
+library(dplyr)
+cities_mytop50 <- cities_raw %>% 
+  arrange(desc(Population)) %>% # sort Tibble by Population and descending
+  mutate(freq = Population / sum(Population)) %>% # percent of Population
+  mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
 
-#### find cities online - maybe with lat/long? ####
+# Get top 10 by population from cities
+cities_top10 <- cities_raw %>% 
+  arrange(desc(Population)) %>% # sort Tibble by Population and descending
+  slice_head(n = 10) %>% # Get only the first n rows.
+  mutate(freq = Population / sum(Population)) %>% # percent of Population
+  mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
+
+#### To Do: find cities online - maybe with lat/long? ####
 # To Do: get top xxx cities by population from online webscrape
 
 
 #### link to google API ####
-# Load libraries first
 library(ggplot2)
 library(ggmap)
 
@@ -24,17 +40,7 @@ library(ggmap)
 # Use mapdist function.  Default mode is "mode = driving" if nothing added.
 
 
-#### Get top 10 to work and save ####
-# Get top 10 by population from cities
-# Get percent of Population by city from total Population.
-# If 4,000 cars moving per month, with a ratio by Population, calc cars by city.
-num_cars_month <- 4000
-library(dplyr)
-cities_top10 <- cities %>% 
-  arrange(desc(Population)) %>% # sort Tibble by Population and descending
-  slice_head(n = 10) %>% # Get only the first n rows.
-  mutate(freq = Population / sum(Population)) %>% # percent of Population
-  mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
+#### Compute Distance for Top 10 Cities and save ####
 
 # Create empty Tibble with 9 columns
 distances <- tibble(from=character(0),to=character(0),distance=numeric(0),
@@ -68,5 +74,3 @@ for (i in 1:length(from)){
 # Save to .csv file
 write_csv(distances,"distances_top_10.csv")
 
-
-### Add 

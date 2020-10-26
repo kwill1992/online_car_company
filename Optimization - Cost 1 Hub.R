@@ -1,5 +1,6 @@
 #### Header ####
-
+# Add description about what I'm doing.
+# Trivial problem for network flow.
 #### Get a basic model working ####
 library(lpSolve)
 library(lpSolveAPI)
@@ -33,6 +34,8 @@ f.rhs <- c(893,614,440,352,328,292,287,284,280,230)
 
 lp("min", f.obj, f.con, f.dir, f.rhs)
 lp("min", f.obj, f.con, f.dir, f.rhs)$solution
+
+#### Get 10 Cities working with importing data into matrices or vectors. ####
 
 
 

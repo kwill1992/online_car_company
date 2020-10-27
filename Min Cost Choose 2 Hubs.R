@@ -18,13 +18,20 @@ model <- MIPModel()  %>%
   # Choose Houston (Y1) or Washington (Y2)
   add_variable(y[j], j = 1:2, type = "binary") %>% 
   # minimize shipping cost
-  set_objective(sum_expr(shipcost(i,j) * x[i, j], i = 1:10, j = 1:2), "min") %>% 
+  set_objective(sum_expr(cost[i,j] * x[i, j], i = 1:10, j = 1:2), "min") %>% 
   # must use supply from each city
   add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) %>% 
   # use only one Y
-  add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
+  add_constraint(sum_expr(y[j], j = 1:2) == 1) #%>% 
   # add linking variables
   
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+result
+get_solution(result, x[i,j])
+get_solution(result, y[j])
+
+
+
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -46,14 +53,13 @@ model <- MIPModel()  %>%
   add_variable(y[j], j = 1:2, type = "binary") %>% 
   #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
   # minimize shipping cost
-  set_objective(sum_expr(cost_m(i,j) * x[i,j], i = 1:10, j = 1:2), "min") %>% 
+  set_objective(sum_expr(cost_m[i,j] * x[i,j], i = 1:10, j = 1:2), "min") %>% 
   # must use supply from each city
-  
-  
+ 
   ### fix this with J's, not 1 and 2
   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
   # FIXED! works with j's
-  #add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) #%>% 
+  add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) %>% 
   # use only one Y
   add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
   # add linking variables

@@ -49,7 +49,9 @@ model <- MIPModel()  %>%
   
   
   ### fix this with J's, not 1 and 2
-  add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>% 
+  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
+  # FIXED! works with j's
+  add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) #%>% 
 # use only one Y
 #add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
 # add linking variables

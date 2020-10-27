@@ -13,8 +13,8 @@ cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
 supply <- c(893,614,440,352,328,292,287,284,280,230)
 
 model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
-  add_variable(x[i, j], i = 1:10, j = 1:2, type = "integer") %>% 
+  # Number of cars shipped from Xi to Xj
+  add_variable(x[i, j], i = 1:10, j = 1:2, type = "integer", lb = 0) %>% 
   # Choose Houston (Y1) or Washington (Y2)
   add_variable(y[j], j = 1:2, type = "binary") %>% 
   # minimize shipping cost
@@ -44,15 +44,16 @@ model <- MIPModel()  %>%
   add_variable(x[i,j], i = 1:10, j = 1:2, type = "integer", lb = 0) %>% 
   # Choose Houston (Y1) or Washington (Y2)
   add_variable(y[j], j = 1:2, type = "binary") %>% 
+  #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
   # minimize shipping cost
-  set_objective(sum_expr(cost_m[i,j] * x[i,j], i = 1:10, j = 1:2), "min") %>% 
+  set_objective(sum_expr(cost_m(i,j) * x[i,j], i = 1:10, j = 1:2), "min") %>% 
   # must use supply from each city
   
   
   ### fix this with J's, not 1 and 2
   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
   # FIXED! works with j's
-  add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) #%>% 
+  #add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) #%>% 
   # use only one Y
   add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
   # add linking variables
@@ -83,3 +84,4 @@ model <- MIPModel()  %>%
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 result
 get_solution(result, x[i,j])
+get_solution(result, y[j])

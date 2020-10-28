@@ -52,9 +52,10 @@ model <- MIPModel()  %>%
   # FIXED! works with j's
   add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
   # use only one Y
-  add_constraint(sum_expr(y[j], j = 1:6) == 1) %>% 
+  add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
   # add linking variables
-  add_constraint(x[i,j] <= 1000*y[j], i = 1:6, j = 1:6)
+  # 1500 because the new limit should be 1224
+  add_constraint(x[i,j] <= 1500*y[j], i = 1:6, j = 1:6)
 # add_constraint(x[i,1] <= 1000*y[1], i = 1:10) %>% 
 # add_constraint(x[i,2] <= 1000*y[2], i = 1:10)
 # 

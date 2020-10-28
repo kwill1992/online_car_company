@@ -51,7 +51,8 @@ model <- MIPModel()  %>%
   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
   # FIXED! works with j's
   add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
-  # use only one Y
+  # add this to keep Houston
+  add_constraint(y[5] == 1) %>% 
   add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
   # add linking variables
   # 1500 because the new limit should be 1224
@@ -86,3 +87,11 @@ result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 result
 get_solution(result, x[i,j])
 get_solution(result, y[j])
+
+
+
+#### Add maps ####
+library(maps)
+map('usa')
+
+population_raw <- read_csv("co-est2019-alldata.csv")

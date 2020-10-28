@@ -31,7 +31,7 @@ get_solution(result, x[i,j])
 get_solution(result, y[j])
 
 
-
+#### this works ####
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -63,28 +63,31 @@ model <- MIPModel()  %>%
   # use only one Y
   add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
   # add linking variables
-    
-  # Not working
-  add_constraint(x[1,1] <= 1000*y[1]) %>% 
-  add_constraint(x[2,1] <= 1000*y[1]) %>%
-  add_constraint(x[3,1] <= 1000*y[1]) %>%
-  add_constraint(x[4,1] <= 1000*y[1]) %>%
-  add_constraint(x[5,1] <= 1000*y[1]) %>%
-  add_constraint(x[6,1] <= 1000*y[1]) %>%
-  add_constraint(x[7,1] <= 1000*y[1]) %>%
-  add_constraint(x[8,1] <= 1000*y[1]) %>%
-  add_constraint(x[9,1] <= 1000*y[1]) %>%
-  add_constraint(x[10,1] <= 1000*y[1]) %>%
-  add_constraint(x[1,2] <= 1000*y[2]) %>%
-  add_constraint(x[2,2] <= 1000*y[2]) %>%
-  add_constraint(x[3,2] <= 1000*y[2]) %>%
-  add_constraint(x[4,2] <= 1000*y[2]) %>%
-  add_constraint(x[5,2] <= 1000*y[2]) %>%
-  add_constraint(x[6,2] <= 1000*y[2]) %>%
-  add_constraint(x[7,2] <= 1000*y[2]) %>%
-  add_constraint(x[8,2] <= 1000*y[2]) %>%
-  add_constraint(x[9,2] <= 1000*y[2]) %>%
-  add_constraint(x[10,2] <= 1000*y[2]) 
+  add_constraint(x[i,j] <= 1000*y[j], i = 1:10, j = 1:2)
+  # add_constraint(x[i,1] <= 1000*y[1], i = 1:10) %>% 
+  # add_constraint(x[i,2] <= 1000*y[2], i = 1:10)
+  # 
+  # # Not working
+  # add_constraint(x[1,1] <= 1000*y[1]) %>% 
+  # add_constraint(x[2,1] <= 1000*y[1]) %>%
+  # add_constraint(x[3,1] <= 1000*y[1]) %>%
+  # add_constraint(x[4,1] <= 1000*y[1]) %>%
+  # add_constraint(x[5,1] <= 1000*y[1]) %>%
+  # add_constraint(x[6,1] <= 1000*y[1]) %>%
+  # add_constraint(x[7,1] <= 1000*y[1]) %>%
+  # add_constraint(x[8,1] <= 1000*y[1]) %>%
+  # add_constraint(x[9,1] <= 1000*y[1]) %>%
+  # add_constraint(x[10,1] <= 1000*y[1]) %>%
+  # add_constraint(x[1,2] <= 1000*y[2]) %>%
+  # add_constraint(x[2,2] <= 1000*y[2]) %>%
+  # add_constraint(x[3,2] <= 1000*y[2]) %>%
+  # add_constraint(x[4,2] <= 1000*y[2]) %>%
+  # add_constraint(x[5,2] <= 1000*y[2]) %>%
+  # add_constraint(x[6,2] <= 1000*y[2]) %>%
+  # add_constraint(x[7,2] <= 1000*y[2]) %>%
+  # add_constraint(x[8,2] <= 1000*y[2]) %>%
+  # add_constraint(x[9,2] <= 1000*y[2]) %>%
+  # add_constraint(x[10,2] <= 1000*y[2]) 
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))

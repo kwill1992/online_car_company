@@ -79,6 +79,7 @@ p
 # A quick approximation to the centroids (centers of gravity) of the polygons is to compute the center of the bounding rectangle.
 # 
 # This is easiest to do with the data from map_data.
+library(dplyr)
 state_centroids <- summarize(group_by(gusa, region),
                              x = mean(range(long)), y = mean(range(lat)))
 names(state_centroids)[1] <- "state"
@@ -171,7 +172,9 @@ map("state", fill = TRUE, col = pal[usa_pieces$pcls], border = "grey")
 
 # Choropleth Maps of County Population
 # For a county-level ggplot map, first get the polygon data frame:
-  
+library(purrr)
+library(tidyr)
+library(ggplot2)
 gcounty <- map_data("county")
 head(gcounty)
 
@@ -195,7 +198,7 @@ head(gcounty)
 
 
 #Pull together the data for the map:
-  
+ncls <- 6 
 cpop <- select(pep2018,
                fips = GEO.id2,
                pop10 = rescen42010,
@@ -231,17 +234,35 @@ ggplot(gcounty_pop) +
 
 
 #A discrete scale with a very different color to highlight the counties with missing information:
-  
 ggplot(gcounty_pop) +
   geom_polygon(aes(long, lat, group = group, fill = pcls18),
                color = "grey", size = 0.1) +
   geom_polygon(aes(long, lat, group = group),
                fill = NA, data = gusa, color = "lightgrey") +
   coord_map("bonne", parameters=45) + ggthemes::theme_map() +
-  scale_fill_brewer(palette = "Reds", na.value = "blue") +
+  scale_fill_brewer(palette = "Reds", na.value = "blue")
+
+
+ 
+## add on cities
+# Below is out of order right now as of 29 Oct
+
+
+
+
+ggplot(gcounty_pop) +
+  geom_polygon(aes(long, lat, group = group, fill = pcls18),
+               color = "grey", size = 0.1) +
+  geom_polygon(aes(long, lat, group = group),
+               fill = NA, data = gusa, color = "lightgrey") +
+  coord_map("bonne", parameters=45) + ggthemes::theme_map() +
+  scale_fill_brewer(palette = "Reds", na.value = "white") +
   theme(legend.background = element_rect(fill = NA)) +
   geom_point(data = cities_ggmap, aes(x = lon, y= lat)) +
 
+  
+  
+  
 ## using ggmap data from below  
   geom_text(data = cities_ggmap, aes(x = lon, y =lat, label = Cities)) +
   geom_segment(data = cities_ggmap, aes(x = lon[1], y = lat[1], xend = lon[2],

@@ -5,27 +5,39 @@ date: "10/29/2020"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 # Mixed-Integer Linear Programming (MILP) optimization plus sensitivity analysis
 
 ## Use of a MILP optimization method and R to choose which hubs (and how many) to use as vehicle preparation and distribution centers for an online car sales company  
 
-Premise: Speedy Car Sales (SCS) is an online automobile sales company intending to buy and sell vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
+###### Premise: Speedy Car Sales (SCS) is a fictional online automobile sales company intending to buy and sell used vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
 
+MILP Optimization will be conducted using R and Microsoft Excel.  
 
+Step 1: Gather population data  
+In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, were are the vehicle coming from and going to? Where the people are! Let's get US population data by city.  
+There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r cars}
+summary(cars)
 ```
+Step 2: Plot data  
+
+
+Step 3:  
+
+Step 4:  
+
+
 
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
 
 ## Including Plots
 

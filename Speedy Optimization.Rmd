@@ -39,11 +39,11 @@ tail(pep2018)
 
 #Working with the county names can be tricky:
   
-head(filter(pep2018, grepl(", Iowa", GEO.display.label)))
+#head(filter(pep2018, grepl(", Iowa", GEO.display.label)))
 
 pep2018[1803,]
-filter(pep2018, GEO.id2 == 19141)
-filter(pep2018, GEO.id2 == 22001)
+#filter(pep2018, GEO.id2 == 19141)
+#filter(pep2018, GEO.id2 == 22001)
 
 # For US counties it is safer to work with the FIPS county code, which is the GEO.id2 variable.
 # 
@@ -74,7 +74,7 @@ head(gusa)
 ## 4 -87.53076 30.33239     1     4 alabama      <NA>
 ## 5 -87.57087 30.32665     1     5 alabama      <NA>
 ## 6 -87.58806 30.32665     1     6 alabama      <NA>
-head(filter(gusa, region == "virginia"))
+#head(filter(gusa, region == "virginia"))
 ##        long      lat group order   region  subregion
 ## 1 -75.64188 37.96418    53 13482 virginia chesapeake
 ## 2 -75.61897 37.99856    53 13483 virginia chesapeake
@@ -173,7 +173,7 @@ map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
 #This uses the match function to find indices for each polygon’s state in the regions vector.
 
 #Another way to compute the classes for the pieces:
-  
+library(tidyr) 
 usa_pieces <- data.frame(names = usa$names)
 usa_pieces <- separate(usa_pieces, "names", c("region", "subregion"),
                        sep = ":", fill = "right")

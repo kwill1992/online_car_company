@@ -239,4 +239,29 @@ ggplot(gcounty_pop) +
                fill = NA, data = gusa, color = "lightgrey") +
   coord_map("bonne", parameters=45) + ggthemes::theme_map() +
   scale_fill_brewer(palette = "Reds", na.value = "blue") +
-  theme(legend.background = element_rect(fill = NA))
+  theme(legend.background = element_rect(fill = NA)) +
+  geom_point(data = cities_ggmap, aes(x = lon, y= lat)) +
+
+## using ggmap data from below  
+  geom_text(data = cities_ggmap, aes(x = lon, y =lat, label = Cities)) +
+  geom_segment(data = cities_ggmap, aes(x = lon[1], y = lat[1], xend = lon[2],
+                                        yend = lat[2]), color = "blue", size = 0.3,
+                                        arrow = arrow())
+#data(world.cities)
+#### get lat longs ####
+library(ggmap)
+register_google(key = 'your key')
+# create a list of cities
+cities <- c("New York, New York", "Los Angeles, California")
+cities_df <- data.frame(Cities = cities, stringsAsFactors = FALSE)
+
+# run the geocode function from ggmap package
+cities_ggmap <- geocode(location = cities, output = "more", source = "google")
+cities_ggmap <- cbind(cities_df, cities_ggmap)
+
+# print the results
+cities_ggmap[, 1:6]
+
+
+# us cities
+data("us.cities")

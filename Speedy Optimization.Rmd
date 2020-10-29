@@ -29,27 +29,27 @@ if (! file.exists("PEP_2018_PEPANNRES.zip")) {
 }
 
 pep2018 <- read.csv("PEP_2018_PEPANNRES_with_ann.csv")
-#pepvars <- names(pep2018)
+pepvars <- names(pep2018)
 pep2018 <- read.csv("PEP_2018_PEPANNRES_with_ann.csv", stringsAsFactors = FALSE,
                     head = FALSE, skip = 2)
-#names(pep2018) <- pepvars
+names(pep2018) <- pepvars
 
-#head(pep2018)
-#tail(pep2018)
+head(pep2018)
+tail(pep2018)
 
 #Working with the county names can be tricky:
   
-#head(filter(pep2018, grepl(", Iowa", GEO.display.label)))
+head(filter(pep2018, grepl(", Iowa", GEO.display.label)))
 
-# pep2018[1803,]
-# filter(pep2018, GEO.id2 == 19141)
-# filter(pep2018, GEO.id2 == 22001)
+pep2018[1803,]
+filter(pep2018, GEO.id2 == 19141)
+filter(pep2018, GEO.id2 == 22001)
 
 # For US counties it is safer to work with the FIPS county code, which is the GEO.id2 variable.
 # 
 # The county.fips data frame in the maps package links the FIPS code to region names used by the map data in the maps package.
 library(maps)
-#head(county.fips)
+head(county.fips)
 
 # Basic Map Data
 # Map data from the map function in package maps consists of the x and y coordinates of polygons and names for the regions.
@@ -252,6 +252,7 @@ ggplot(gcounty_pop) +
                fill = NA, data = gusa, color = "lightgrey") +
   coord_map("bonne", parameters=45) + ggthemes::theme_map() +
   scale_fill_brewer(palette = "Reds", na.value = "blue")
+
 ```
 Step 2: Plot data  
 

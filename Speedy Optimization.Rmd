@@ -21,7 +21,7 @@ Step 1: Gather population data
 In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, were are the vehicle coming from and going to? Where the people are! Let's get US population data by city.  
 There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.
 
-```{r}
+```{r dpi = 150}
 if (! file.exists("PEP_2018_PEPANNRES.zip")) {
   download.file("http://www.stat.uiowa.edu/~luke/data/PEP_2018_PEPANNRES.zip",
                 "PEP_2018_PEPANNRES.zip")
@@ -34,14 +34,14 @@ pep2018 <- read.csv("PEP_2018_PEPANNRES_with_ann.csv", stringsAsFactors = FALSE,
                     head = FALSE, skip = 2)
 names(pep2018) <- pepvars
 
-head(pep2018)
-tail(pep2018)
+#head(pep2018)
+#tail(pep2018)
 
 #Working with the county names can be tricky:
   
 #head(filter(pep2018, grepl(", Iowa", GEO.display.label)))
 
-pep2018[1803,]
+#pep2018[1803,]
 #filter(pep2018, GEO.id2 == 19141)
 #filter(pep2018, GEO.id2 == 22001)
 
@@ -49,24 +49,24 @@ pep2018[1803,]
 # 
 # The county.fips data frame in the maps package links the FIPS code to region names used by the map data in the maps package.
 library(maps)
-head(county.fips)
+#head(county.fips)
 
 # Basic Map Data
 # Map data from the map function in package maps consists of the x and y coordinates of polygons and names for the regions.
 
 usa <- map("state", fill = TRUE, plot = FALSE)
-plot(usa$x, usa$y, type = "n")
-polygon(usa$x, usa$y)
+#plot(usa$x, usa$y, type = "n")
+#polygon(usa$x, usa$y)
 
-sum(is.na(usa$x))
+#sum(is.na(usa$x))
 ## [1] 62
-length(usa$names)
+#length(usa$names)
 ## [1] 63
-usa$names
+#usa$names
 
 library(ggplot2)
 gusa <- map_data("state")
-head(gusa)
+#head(gusa)
 ##        long      lat group order  region subregion
 ## 1 -87.46201 30.38968     1     1 alabama      <NA>
 ## 2 -87.48493 30.37249     1     2 alabama      <NA>
@@ -83,7 +83,7 @@ head(gusa)
 ## 5 -75.41843 37.96991    53 13486 virginia chesapeake
 ## 6 -75.42989 37.94127    53 13487 virginia chesapeake
 p <- ggplot(gusa) + geom_polygon(aes(long, lat, group = group), color = "white")
-p
+#p
 
 
 # Approximate Centroids
@@ -94,7 +94,7 @@ library(dplyr)
 state_centroids <- summarize(group_by(gusa, region),
                              x = mean(range(long)), y = mean(range(lat)))
 names(state_centroids)[1] <- "state"
-head(state_centroids)
+#head(state_centroids)
 
 # Symbol Plots of State Population
 # Aggregate the county populations to the state level:
@@ -102,7 +102,7 @@ head(state_centroids)
 state_pops <- mutate(pep2018,
                      state = tolower(sub(".*, ", "", GEO.display.label)),
                      pop = respop72018)
-unique(state_pops$state)
+#unique(state_pops$state)
 
 state_pops <- summarize(group_by(state_pops, state),
                         pop = sum(pop, na.rm = TRUE))
@@ -114,7 +114,7 @@ state_pops <- summarize(group_by(state_pops, state),
 
 state_pops <- inner_join(state_pops, state_centroids, "state")
 
-head(state_pops)
+#head(state_pops)
 
 
 # Choropleth Maps of State Population
@@ -124,7 +124,7 @@ head(state_pops)
   
 sp <- select(state_pops, region = state, pop)
 gusa_pop <- left_join(gusa, sp, "region")
-head(gusa_pop)
+#head(gusa_pop)
 ##        long      lat group order  region subregion     pop
 ## 1 -87.46201 30.38968     1     1 alabama      <NA> 4887871
 ## 2 -87.48493 30.37249     1     2 alabama      <NA> 4887871
@@ -135,20 +135,20 @@ head(gusa_pop)
 
 #A first attempt:
   
-ggplot(gusa_pop) +
-  geom_polygon(aes(long, lat, group = group, fill = pop)) +
-  coord_map("bonne", parameters=45) +
-  ggthemes::theme_map()
+# ggplot(gusa_pop) +
+#   geom_polygon(aes(long, lat, group = group, fill = pop)) +
+#   coord_map("bonne", parameters=45) +
+#   ggthemes::theme_map()
 
 # This image is dominated by the fact that most state populations are small.
 # 
 # Showing population ranks, or percentile values, can help see the variation a bit better.
 spr <- mutate(sp, rpop = rank(pop))
 gusa_rpop <- left_join(gusa, spr, "region")
-ggplot(gusa_rpop) +
-  geom_polygon(aes(long, lat, group = group, fill = rpop)) +
-  coord_map("bonne", parameters=45) +
-  ggthemes::theme_map()
+# ggplot(gusa_rpop) +
+#   geom_polygon(aes(long, lat, group = group, fill = rpop)) +
+#   coord_map("bonne", parameters=45) +
+#   ggthemes::theme_map()
 
 # Using quintile bins instead of a continuous scale:
 ncls <- 6
@@ -156,19 +156,19 @@ spr <- mutate(spr,
               pcls = cut(pop, quantile(pop, seq(0, 1, len = ncls)),
                          include.lowest = TRUE))
 gusa_rpop <- left_join(gusa, spr, "region")
-ggplot(gusa_rpop) +
-  geom_polygon(aes(long, lat, group = group, fill = pcls),
-               color = "grey") +
-  coord_map("bonne", parameters=45) +
-  ggthemes::theme_map() +
-  scale_fill_brewer(palette = "Reds")
+# ggplot(gusa_rpop) +
+#   geom_polygon(aes(long, lat, group = group, fill = pcls),
+#                color = "grey") +
+#   coord_map("bonne", parameters=45) +
+#   ggthemes::theme_map() +
+#   scale_fill_brewer(palette = "Reds")
 
 #A percentile bin map using the map function requires a vector of colors for the regions:
   
 usa_states <- sub(":.*", "", usa$names)
 usa_pcls <- spr$pcls[match(usa_states, spr$region)]
 pal <- RColorBrewer::brewer.pal(nlevels(usa_pcls), "Reds")
-map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
+#map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
 
 #This uses the match function to find indices for each polygon’s state in the regions vector.
 
@@ -178,7 +178,7 @@ usa_pieces <- data.frame(names = usa$names)
 usa_pieces <- separate(usa_pieces, "names", c("region", "subregion"),
                        sep = ":", fill = "right")
 usa_pieces <- left_join(usa_pieces, spr, "region")
-map("state", fill = TRUE, col = pal[usa_pieces$pcls], border = "grey")
+#map("state", fill = TRUE, col = pal[usa_pieces$pcls], border = "grey")
 
 
 # Choropleth Maps of County Population
@@ -187,11 +187,11 @@ library(purrr)
 library(tidyr)
 library(ggplot2)
 gcounty <- map_data("county")
-head(gcounty)
+#head(gcounty)
 
 #To attach the FIPS code we first need to clean up the county.fips table a bit:
   
-head(filter(county.fips, grepl(":", polyname)))
+#head(filter(county.fips, grepl(":", polyname)))
 
 #Remove the sub-county regions, remove duplicate rows, and split the polyname variable into region and subregion:
   
@@ -200,12 +200,12 @@ fipstab <-
 fipstab <- unique(fipstab)
 fipstab <-
   separate(fipstab, county, c("region", "subregion"), sep = ",")
-head(fipstab)
+#head(fipstab)
 
 #Now use left_join to merge the FIPS code into gcounty:
   
 gcounty <- left_join(gcounty, fipstab, c("region", "subregion"))
-head(gcounty)
+#head(gcounty)
 
 
 #Pull together the data for the map:
@@ -218,7 +218,7 @@ cpop <- mutate(cpop, rpop18 = rank(pop18))
 cpop <- mutate(cpop,
                pcls18 = cut(pop18, quantile(pop18, seq(0, 1, len = ncls)),
                             include.lowest = TRUE))
-head(cpop)
+#head(cpop)
 
 #Some of the counties in the polygon data base may not appear in the population data:
   
@@ -236,12 +236,12 @@ unique(select(filter(gcounty_pop, is.na(rpop18)), region, subregion))
 ## 1 south dakota   shannon
 #County level population plots using the default continuous scale:
 
-ggplot(gcounty_pop) +
-  geom_polygon(aes(long, lat, group = group, fill = rpop18),
-               color = "grey", size = 0.1) +
-  geom_polygon(aes(long, lat, group = group),
-               fill = NA, data = gusa, color = "lightgrey") +
-  coord_map("bonne", parameters=45) + ggthemes::theme_map()
+# ggplot(gcounty_pop) +
+#   geom_polygon(aes(long, lat, group = group, fill = rpop18),
+#                color = "grey", size = 0.1) +
+#   geom_polygon(aes(long, lat, group = group),
+#                fill = NA, data = gusa, color = "lightgrey") +
+#   coord_map("bonne", parameters=45) + ggthemes::theme_map()
 
 
 #A discrete scale with a very different color to highlight the counties with missing information:
@@ -251,9 +251,56 @@ ggplot(gcounty_pop) +
   geom_polygon(aes(long, lat, group = group),
                fill = NA, data = gusa, color = "lightgrey") +
   coord_map("bonne", parameters=45) + ggthemes::theme_map() +
-  scale_fill_brewer(palette = "Reds", na.value = "blue")
+  scale_fill_brewer(palette = "Reds", na.value = "white") +
+  theme(legend.position="none")
 
 ```
+This doesn't help us too much. This data was separated in to 5 different levels of population by county.  It gives us false impressions of population areas.  For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which looks heavily populated.
+
+Fortunately, the Internet can link us up with U.S. Census data to get estimated population by city and also by metro area.
+
+```{r dpi = 150}
+# us map of states and populations
+library(tidyverse)
+
+library(ggplot2)
+
+# "us.cities" in maps package contains This database is of us cities of population
+# greater than about 40,000. Also included are state capitals of any 
+# population size.
+# "state" database produces a map of the states of the United States
+# mainland generated from US De- partment of the Census data
+library(maps)
+
+us_states <- as_tibble(map_data("state"))
+us_cities <- as_tibble(us.cities)
+
+us_cities <-us_cities %>% 
+  filter(country.etc != "AK") %>% 
+  filter(country.etc != "HI")
+
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = us_cities, aes( x = long, y = lat,
+                                    size = pop, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE)
+```
+
+To do: put legend at bottom.
+Maybe use previous map
+
+This gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston New York, Washington D.C., Miami, etc... are clearly shown better.
+
+In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. That is doable for advanced commercial optimization algorithms, but too many for what we want to do.  
+In our fictional sales company, they are in the early growth stage. 
+
+For this stage, we will assume they have just one hub and are looking to expand. The car company started in Houston, TX and that is where their distribution center is. 
+
+For this next phase, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
+
+
+
 Step 2: Plot data  
 
 

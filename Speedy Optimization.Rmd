@@ -2,7 +2,10 @@
 title: "Optimization of Speedy Car Sales"
 author: "Kevin Williams"
 date: "10/29/2020"
-output: html_document
+output:
+  html_document:
+    code_folding: hide
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +24,7 @@ Step 1: Gather population data
 In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, were are the vehicle coming from and going to? Where the people are! Let's get US population data by city.  
 There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.
 
-```{r dpi = 150}
+```{r dpi = 150, warning= FALSE, message = FALSE}
 if (! file.exists("PEP_2018_PEPANNRES.zip")) {
   download.file("http://www.stat.uiowa.edu/~luke/data/PEP_2018_PEPANNRES.zip",
                 "PEP_2018_PEPANNRES.zip")
@@ -259,7 +262,7 @@ This doesn't help us too much. This data was separated in to 5 different levels 
 
 Fortunately, the Internet can link us up with U.S. Census data to get estimated population by city and also by metro area.
 
-```{r dpi = 150}
+```{r dpi = 150, warning= FALSE, message = FALSE}
 # us map of states and populations
 library(tidyverse)
 
@@ -299,7 +302,7 @@ For this stage, we will assume they have just one hub and are looking to expand.
 
 For this next phase, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
 
-
+![adf in](Images/image1.png)
 
 Step 2: Plot data  
 

@@ -44,6 +44,8 @@ cities_mytop50 <- cities_raw %>%
   #slice_head(n = 11) %>% # Get only the first n rows.
   mutate(freq = Population / sum(Population)) %>% # percent of Population
   mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
+# Save this for later use
+write_csv(cities_mytop50, "cities_top50.csv")
 
 # Get top 10 by population from cities
 cities_top10 <- cities_raw %>% 
@@ -51,6 +53,8 @@ cities_top10 <- cities_raw %>%
   slice_head(n = 10) %>% # Get only the first n rows.
   mutate(freq = Population / sum(Population)) %>% # percent of Population
   mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
+# Save this for later use
+write_csv(cities_top10, "cities_top10.csv")
 
 # Get top 6 by population form cities
 cities_top6 <- cities_raw %>% 
@@ -58,6 +62,8 @@ cities_top6 <- cities_raw %>%
   slice_head(n = 6) %>% # Get only the first n rows.
   mutate(freq = Population / sum(Population)) %>% # percent of Population
   mutate(num_cars = round(freq * num_cars_month,0)) # Calc number cars moving each month
+# Save this for later use
+write_csv(cities_top6, "cities_top6.csv")
 
 #### To Do: find cities online - maybe with lat/long? ####
 # To Do: get top xxx cities by population from online webscrape

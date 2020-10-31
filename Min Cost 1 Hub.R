@@ -94,7 +94,6 @@ get_solution(result, x[i])
 #### now map it ####
 library(tidyverse)
 
-library(ggplot2)
 
 # "us.cities" in maps package contains This database is of us cities of population
 # greater than about 40,000. Also included are state capitals of any 
@@ -109,37 +108,41 @@ cities_10 <- read_csv("distances_top_10.csv")
 # Get states for plotting state map
 us_states <- as_tibble(map_data("state"))
 
-library(ggmap)
-LA <- map_data("state", region="louisiana")
+# library(ggmap)
+# LA <- map_data("state", region="louisiana")
+# 
+# salesCalls <- data.frame(State=rep("louisiana",5), 
+#                          City=c("Baton Rouge", "New Orleans", "Shreveport", 
+#                                 "Lafayette", "Mandeville"),
+#                          Calls=c(10,5,8,13,2))
+# 
+# cities_10 <- cbind(geocode(as.character(salesCalls$City)), salesCalls)
+# cities_10 <- cbind(geocode(as.character(cities_10$from)), cities_10)
+# 
+# salesCalls
+# #         lon      lat     State        City Calls
+# # 1 -91.14032 30.45828 louisiana Baton Rouge    10
+# # 2 -90.07153 29.95107 louisiana New Orleans     5
+# # 3 -93.75018 32.52515 louisiana  Shreveport     8
+# # 4 -92.01984 30.22409 louisiana   Lafayette    13
+# # 5 -90.06563 30.35825 louisiana  Mandeville     2
 
-salesCalls <- data.frame(State=rep("louisiana",5), 
-                         City=c("Baton Rouge", "New Orleans", "Shreveport", 
-                                "Lafayette", "Mandeville"),
-                         Calls=c(10,5,8,13,2))
-
-cities_10 <- cbind(geocode(as.character(salesCalls$City)), salesCalls)
-cities_10 <- cbind(geocode(as.character(cities_10$from)), cities_10)
-
-salesCalls
-#         lon      lat     State        City Calls
-# 1 -91.14032 30.45828 louisiana Baton Rouge    10
-# 2 -90.07153 29.95107 louisiana New Orleans     5
-# 3 -93.75018 32.52515 louisiana  Shreveport     8
-# 4 -92.01984 30.22409 louisiana   Lafayette    13
-# 5 -90.06563 30.35825 louisiana  Mandeville     2
-
-ggplot(LA, aes(x=long, y=lat)) +
-  geom_polygon() +
-  coord_map() +
-  geom_point(data=salesCalls, aes(x=lon, y=lat, size=Calls), color="orange")
-
+# ggplot(LA, aes(x=long, y=lat)) +
+#   geom_polygon() +
+#   coord_map() +
+#   geom_point(data=salesCalls, aes(x=lon, y=lat, size=Calls), color="orange")
+# 
 
 ggplot(data = us_states, mapping = aes(x = long, y = lat,
                                        group = group)) +
   geom_polygon(fill= "white", color = "black") +
-  geom_point(data = us_cities, aes( x = long, y = lat,
-                                    size = pop, color = "purple", alpha = 0.5),
-             inherit.aes = FALSE)
+  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
+                                        yend = lat.to[5]), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE)
 
 
 

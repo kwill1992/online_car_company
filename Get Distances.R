@@ -127,6 +127,9 @@ distances <- cbind(geocode(as.character(distances$to)), distances)
 # Rename lat/long columns
 names(distances)[1] <- "lon.to"
 names(distances)[2] <- "lat.to"
+# Add "cost"
+# Cost(in $) == 100 + 15*sqrt(dist)
+distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
 write_csv(distances,"distances_top_6.csv")
 
@@ -176,7 +179,9 @@ distances <- cbind(geocode(as.character(distances$to)), distances)
 # Rename lat/long columns
 names(distances)[1] <- "lon.to"
 names(distances)[2] <- "lat.to"
-
+# Add "cost"
+# Cost(in $) == 100 + 15*sqrt(dist)
+distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
 write_csv(distances,"distances_top_10.csv")
 
@@ -224,7 +229,9 @@ distances <- cbind(geocode(as.character(distances$to)), distances)
 # Rename lat/long columns
 names(distances)[1] <- "lon.to"
 names(distances)[2] <- "lat.to"
-
+# Add "cost"
+# Cost(in $) == 100 + 15*sqrt(dist)
+distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
 write_csv(distances,"distances_my_top_50.csv")
 

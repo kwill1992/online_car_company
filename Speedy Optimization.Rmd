@@ -1,5 +1,5 @@
 ---
-title: "Optimization of Speedy Car Sales"
+title: "Optimization of Speedy Car Sales, Inc."
 author: "Kevin Williams"
 date: "10/29/2020"
 output:
@@ -292,6 +292,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 To do: put legend at bottom.
 Maybe use previous map
+change colors of each size
+
 
 This gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston New York, Washington D.C., Miami, etc... are clearly shown better.
 
@@ -302,7 +304,77 @@ For this stage, we will assume they have just one hub and are looking to expand.
 
 For this next phase, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
 
+After some data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six of our data set looks like this below:
+```{r}
+#### import data set ####
+library(readr)
+library(tidyr)
+# Read in .csv file and create Tibble DF.
+cities_raw <- read_csv("my_top_50.csv")
+head(cities_raw)
+```
+
+Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to caculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
+
+In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking. The company did $1.6B in sales in 2019. With an average selling price of 
+$30000 per vehicle, that is xxxx a year and xxx a month.  Let's assume they are growing. That is 
+4,000 car a month.
+
+
+
+
+We want to start with a small problem to make sure we are doing it correctly.  
+We want the 10 largest metro areas.
+
+For this optimization, we have 10 cities and 1 hub. As we said earlier, the amount of buying and selling is related to the population. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales rate of LA.
+
+For our 50, we filter to the top 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
+Here is our result:
+
+For optimization, 
+
+INSERT Equation
+
+
+
 ![adf in](Images/image1.png)
+
+$$\sum_{i=1}^n X_i$$
+
+
+*** Insert image of Excel
+
+```{r}
+library(ompr)
+library(magrittr)
+library(ROI)
+library(ROI.plugin.glpk)
+library(ompr)
+library(ompr.roi)
+# Shipping Cost
+cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42)
+# Supply to move from each cities
+supply <- c(893,614,440,352,328,292,287,284,280,230)
+
+model <- MIPModel()  %>% 
+  # Number of cars shiped from Xi to Xj
+  add_variable(x[i], i = 1:10, type = "integer", lb = 0) %>% 
+  # minimize shipping cost
+  set_objective(sum_expr(cost[i] * x[i], i = 1:10), "min") %>% 
+  # must use supply from each city
+  add_constraint(x[i] >= supply[i], i = 1:10) #%>% 
+  # use only one Y
+  #add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
+  # add linking variables
+  
+#result <- ROI_solve(model, solver = "glpk")
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+result
+get_solution(result, x[i])
+```
+
+
+
 
 Step 2: Plot data  
 

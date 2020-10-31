@@ -28,3 +28,7 @@ class(us.cities)
 class(state)
 head(us_states)
 head(us_cities)
+
+library(totalcensus)
+#us_metros <- as_tibble(data("dict_cbsa"))
+us_metros <- as_tibble(dict_cbsa)

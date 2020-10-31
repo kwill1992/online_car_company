@@ -336,6 +336,9 @@ Here is our result:
 
 ### show map with 10 cities
 
+
+### first look, 10 C, 1H
+
 For optimization, 
 
 INSERT Equation
@@ -348,6 +351,20 @@ $$\sum_{i=1}^n X_i$$
 
 
 *** Insert image of Excel
+
+
+First we need cost of shipping:  
+
+Show equation
+
+Show getting distances  
+show results  
+
+Show Excel  
+
+
+
+#### Do it in R
 
 ```{r}
 library(ompr)

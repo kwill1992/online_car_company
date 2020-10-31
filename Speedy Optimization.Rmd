@@ -317,6 +317,41 @@ head(cities_raw)
 
 ### show map with 50 cities
 
+```{r}
+#### now map it ####
+library(tidyverse)
+
+
+# "us.cities" in maps package contains This database is of us cities of population
+# greater than about 40,000. Also included are state capitals of any 
+# population size.
+# "state" database produces a map of the states of the United States
+# mainland generated from US De- partment of the Census data
+library(maps)
+library(ggmap)
+
+# Read in 10 city data with distances made in "Get Distances"
+cities_50 <- read_csv("distances_my_top_50.csv")
+
+# Get states for plotting state map
+us_states <- as_tibble(map_data("state"))
+
+
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = cities_50, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_50, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) #+
+  # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
+  #                                       yend = lat.to[5]), color = "blue", size = 0.3,
+  #              arrow = arrow(), inherit.aes = FALSE)
+
+
+```
+
+
 Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to caculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
 
 In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking. The company did $1.6B in sales in 2019. With an average selling price of 
@@ -334,7 +369,58 @@ For this optimization, we have 10 cities and 1 hub. As we said earlier, the amou
 For our 50, we filter to the top 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
 Here is our result:
 
+
+
 ### show map with 10 cities
+```{r}
+#### now map it ####
+library(tidyverse)
+
+
+# "us.cities" in maps package contains This database is of us cities of population
+# greater than about 40,000. Also included are state capitals of any 
+# population size.
+# "state" database produces a map of the states of the United States
+# mainland generated from US De- partment of the Census data
+library(maps)
+library(ggmap)
+
+# Read in 10 city data with distances made in "Get Distances"
+cities_10 <- read_csv("distances_top_10.csv")
+
+# Get states for plotting state map
+us_states <- as_tibble(map_data("state"))
+
+
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) #+
+  # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
+  #                                       yend = lat.to[5]), color = "blue", size = 0.3,
+  #              arrow = arrow(), inherit.aes = FALSE)
+
+```
+
+
+
+```{r}
+library(ggmap)
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
+                                        yend = lat.to[5]), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE)
+
+```
 
 
 ### first look, 10 C, 1H

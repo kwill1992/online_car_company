@@ -16,13 +16,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Use of a MILP optimization method and R to choose which hubs (and how many) to use as vehicle preparation and distribution centers for an online car sales company  
 
-###### Premise: Speedy Car Sales (SCS) is a fictional online automobile sales company intending to buy and sell used vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
+#### Premise of this project: Speedy Car Sales (SCS) is a fictional online automobile sales company intending to buy and sell used vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
 
 MILP Optimization will be conducted using R and Microsoft Excel.  
 
 ### Step 1: Gather population data  
-In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, were are the vehicle coming from and going to? Where the people are! Let's get US population data by city.  
-There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.
+In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, were are the vehicle coming from and going to? Where the people are! Let's get US population data by county or city.  
+There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.  
+
 ### Display population by county
 ```{r dpi = 150, warning= FALSE, message = FALSE}
 if (! file.exists("PEP_2018_PEPANNRES.zip")) {
@@ -225,16 +226,16 @@ cpop <- mutate(cpop,
 
 #Some of the counties in the polygon data base may not appear in the population data:
   
-unique(select(filter(gcounty, ! fips %in% cpop$fips), region, subregion))
+#unique(select(filter(gcounty, ! fips %in% cpop$fips), region, subregion))
 ##         region subregion
 ## 1 south dakota   shannon
-unique(select(anti_join(gcounty, cpop, "fips"), region, subregion))
+#unique(select(anti_join(gcounty, cpop, "fips"), region, subregion))
 ##         region subregion
 ## 1 south dakota   shannon
 #A left_join with cpop will give these NA values.
 
 gcounty_pop <- left_join(gcounty, cpop, "fips")
-unique(select(filter(gcounty_pop, is.na(rpop18)), region, subregion))
+#unique(select(filter(gcounty_pop, is.na(rpop18)), region, subregion))
 ##         region subregion
 ## 1 south dakota   shannon
 #County level population plots using the default continuous scale:
@@ -258,11 +259,12 @@ ggplot(gcounty_pop) +
   theme(legend.position="none")
 
 ```
-This doesn't help us too much. This data was separated in to 5 different levels of population by county.  It gives us false impressions of population areas.  For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which looks heavily populated.
+This is a pleasant looking map, but doesn't help us too much for out purposes. This data was separated in to 5 different levels of population by county.  It gives us false impressions of high population areas. For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which gives the appearance of being heavily populated.
 
 Fortunately, the Internet can link us up with U.S. Census data to get estimated population by city and also by metro area.  
 
-### Display population data by metro area
+### Display population data by metro area  
+
 ```{r dpi = 150, warning= FALSE, message = FALSE}
 # us map of states and populations
 library(tidyverse)
@@ -296,17 +298,19 @@ Maybe use previous map
 change colors of each size
 
 
-This gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston New York, Washington D.C., Miami, etc... are clearly shown better.
+The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston New York, Washington D.C., Miami, etc... are clearly shown better.
 
-In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. That is doable for advanced commercial optimization algorithms, but too many for what we want to do.  
-In our fictional sales company, they are in the early growth stage. 
+In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. That is doable for advanced commercial optimization algorithms, but too many for what we want to do and certainly too many for the Solver that comes with MS Excel.  
+
+### Modeling our business    
+In our fictional sales company, it is in the early growth stage. 
 
 For this stage, we will assume they have just one hub and are looking to expand. The car company started in Houston, TX and that is where their distribution center is. 
 
-For this next phase, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
+For this next phase however, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
 
-After some data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six of our data set looks like this below:
-```{r}
+After some data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six (out of 50) of our data set looks like this below:
+```{r warning= FALSE, message = FALSE}
 #### import data set ####
 library(readr)
 library(tidyr)
@@ -317,7 +321,7 @@ head(cities_raw)
 
 ### show map with 50 cities
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 #### now map it ####
 library(tidyverse)
 
@@ -352,27 +356,35 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ```
 
 
-Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to caculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
+Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to calculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
 
 In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking. The company did $1.6B in sales in 2019. With an average selling price of 
 $30000 per vehicle, that is xxxx a year and xxx a month.  Let's assume they are growing. That is 
-4,000 car a month.
+4,000 cars a month.
+
+We 
 
 
+We want to start with a small problem to make sure we are doing it correctly so will use the 10 largest metro areas.
 
-
-We want to start with a small problem to make sure we are doing it correctly.  
-We want the 10 largest metro areas.
-
-For this optimization, we have 10 cities and 1 hub. As we said earlier, the amount of buying and selling is related to the population. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales rate of LA.
+For this optimization, we have 10 cities and 1 hub. As mentioned earlier, the amount of buying and selling is related to the population. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales of LA.
 
 For our 50, we filter to the top 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
 Here is our result:
+```{r warning= FALSE, message = FALSE}
+cities_10 <- read_csv("distances_top_10.csv")
+cities_10 %>% 
+  select(from, to, from_num_cars) %>% 
+  filter(to == "Houston, Texas" )
+```
+
+
+
 
 
 
 ### show map with 10 cities
-```{r}
+```{r warning= FALSE, message = FALSE}
 #### now map it ####
 library(tidyverse)
 

@@ -793,7 +793,8 @@ cities_50 &lt;- read_csv(&quot;distances_my_top_50.csv&quot;)</code></pre>
 ##   from_num_cars = col_double(),
 ##   to_population = col_double(),
 ##   to_pop_ratio = col_double(),
-##   to_num_cars = col_double()
+##   to_num_cars = col_double(),
+##   cost = col_double()
 ## )</code></pre>
 <pre class="r"><code># Get states for plotting state map
 us_states &lt;- as_tibble(map_data(&quot;state&quot;))
@@ -848,7 +849,8 @@ cities_10 &lt;- read_csv(&quot;distances_top_10.csv&quot;)</code></pre>
 ##   from_num_cars = col_double(),
 ##   to_population = col_double(),
 ##   to_pop_ratio = col_double(),
-##   to_num_cars = col_double()
+##   to_num_cars = col_double(),
+##   cost = col_double()
 ## )</code></pre>
 <pre class="r"><code># Get states for plotting state map
 us_states &lt;- as_tibble(map_data(&quot;state&quot;))
@@ -932,6 +934,11 @@ model &lt;- MIPModel()  %&gt;%
   # add linking variables
   
 #result &lt;- ROI_solve(model, solver = &quot;glpk&quot;)
+# result &lt;- solve_model(model, with_ROI(solver = &quot;glpk&quot;, verbose = TRUE))
+# result
+# get_solution(result, x[i])
+
+
 result &lt;- solve_model(model, with_ROI(solver = &quot;glpk&quot;, verbose = TRUE))</code></pre>
 <pre><code>## &lt;SOLVER MSG&gt;  ----
 ## GLPK Simplex Optimizer, v4.65
@@ -964,6 +971,43 @@ result &lt;- solve_model(model, with_ROI(solver = &quot;glpk&quot;, verbose = TR
 ## 8         x  8   284
 ## 9         x  9   280
 ## 10        x 10   230</code></pre>
+<pre class="r"><code>cities_10 &lt;- read_csv(&quot;distances_top_10.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## cols(
+##   lon.to = col_double(),
+##   lat.to = col_double(),
+##   lon.from = col_double(),
+##   lat.from = col_double(),
+##   from = col_character(),
+##   to = col_character(),
+##   distance = col_double(),
+##   from_population = col_double(),
+##   from_pop_ratio = col_double(),
+##   from_num_cars = col_double(),
+##   to_population = col_double(),
+##   to_pop_ratio = col_double(),
+##   to_num_cars = col_double(),
+##   cost = col_double()
+## )</code></pre>
+<pre class="r"><code>solution &lt;- as_tibble(get_solution(result, x[i]))
+solution$FROM_city &lt;- c(cities_10$from[1:10])
+solution$TO_city &lt;- &quot;Houston, Texas&quot;
+names(solution)[3] &lt;- &quot;# Cars Shipped&quot;
+solution</code></pre>
+<pre><code>## # A tibble: 10 x 5
+##    variable     i `# Cars Shipped` FROM_city          TO_city       
+##    &lt;chr&gt;    &lt;int&gt;            &lt;dbl&gt; &lt;chr&gt;              &lt;chr&gt;         
+##  1 x            1              893 New York, New York Houston, Texas
+##  2 x            2              614 New York, New York Houston, Texas
+##  3 x            3              440 New York, New York Houston, Texas
+##  4 x            4              352 New York, New York Houston, Texas
+##  5 x            5              328 New York, New York Houston, Texas
+##  6 x            6              292 New York, New York Houston, Texas
+##  7 x            7              287 New York, New York Houston, Texas
+##  8 x            8              284 New York, New York Houston, Texas
+##  9 x            9              280 New York, New York Houston, Texas
+## 10 x           10              230 New York, New York Houston, Texas</code></pre>
 <p>Step 2: Plot data</p>
 <p>Step 3:</p>
 <p>Step 4:</p>

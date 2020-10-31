@@ -476,9 +476,20 @@ model <- MIPModel()  %>%
   # add linking variables
   
 #result <- ROI_solve(model, solver = "glpk")
+# result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+# result
+# get_solution(result, x[i])
+
+
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 result
 get_solution(result, x[i])
+cities_10 <- read_csv("distances_top_10.csv")
+solution <- as_tibble(get_solution(result, x[i]))
+solution$FROM_city <- c(cities_10$from[1:10])
+solution$TO_city <- "Houston, Texas"
+names(solution)[3] <- "# Cars Shipped"
+solution
 ```
 
 

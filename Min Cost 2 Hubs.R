@@ -60,5 +60,5 @@ model <- MIPModel()  %>%
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 result
 get_solution(result, x[i,j])
-
+temp_df <- as_tibble(get_solution(result, x[i,j]))
 ### This works!!

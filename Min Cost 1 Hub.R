@@ -151,6 +151,9 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 
 
+
+
+
 ggplot(gcounty_pop) +
   geom_polygon(aes(long, lat, group = group, fill = pcls18),
                color = "grey", size = 0.1) +

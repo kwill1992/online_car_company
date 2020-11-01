@@ -77,36 +77,36 @@ library(ompr.roi)
 # the above wasn't resized for 6 cities
 supply <- as.vector(get_supply$to_num_cars)
 
-model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
-  add_variable(x[i,j], i = 1:6, j = 1:6, type = "integer", lb = 0) %>% 
-  # Choose Houston (Y1) or Washington (Y2)
-  add_variable(y[j], j = 1:6, type = "binary") %>% 
-  #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
-  # minimize shipping cost
-  set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:6, j = 1:6), "min") %>% 
-  # must use supply from each city
-  
-  ### fix this with J's, not 1 and 2
-  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-  # FIXED! works with j's
-  add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
-  # add this to keep Houston
-  add_constraint(y[5] == 1) %>% 
-  add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
-  # add linking variables
-  # 1500 because the new limit should be 1224
-  add_constraint(x[i,j] <= 1500*y[j], i = 1:6, j = 1:6)
+# model <- MIPModel()  %>% 
+#   # Number of cars shiped from Xi to Xj
+#   add_variable(x[i,j], i = 1:6, j = 1:6, type = "integer", lb = 0) %>% 
+#   # Choose Houston (Y1) or Washington (Y2)
+#   add_variable(y[j], j = 1:6, type = "binary") %>% 
+#   #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
+#   # minimize shipping cost
+#   set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:6, j = 1:6), "min") %>% 
+#   # must use supply from each city
+#   
+#   ### fix this with J's, not 1 and 2
+#   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
+#   # FIXED! works with j's
+#   add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
+#   # add this to keep Houston
+#   add_constraint(y[5] == 1) %>% 
+#   add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
+#   # add linking variables
+#   # 1500 because the new limit should be 1224
+#   add_constraint(x[i,j] <= 1500*y[j], i = 1:6, j = 1:6)
+# 
+# 
+# #result <- ROI_solve(model, solver = "glpk")
+# result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+# result
+# get_solution(result, x[i,j])
+# get_solution(result, y[j])
 
 
-#result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-get_solution(result, x[i,j])
-get_solution(result, y[j])
-
-
-num_hubs <- num_cities
+num_hubs <- 3
 
 model <- MIPModel()  %>% 
   # Number of cars shiped from Xi to Xj
@@ -162,12 +162,12 @@ solution <- solution %>%
 
 #m <- 1
 for ( k in 1:length(city_data$lon.to)){
-  solution$FROM_city[k] <- city_data$to[k]
-  solution$lon.from[k] <- city_data$lon.to[k]
-  solution$lat.from[k] <- city_data$lat.to[k]
-  solution$TO_city[k] <- city_data$from[k]
-  solution$lon.to[k] <- city_data$lon.from[k]
-  solution$lat.to[k] <- city_data$lat.from[k]
+  solution$FROM_city[k] <- city_data$from[k]
+  solution$lon.from[k] <- city_data$lon.from[k]
+  solution$lat.from[k] <- city_data$lat.from[k]
+  solution$TO_city[k] <- city_data$to[k]
+  solution$lon.to[k] <- city_data$lon.to[k]
+  solution$lat.to[k] <- city_data$lat.to[k]
   #m < m + 1
 
 }

@@ -417,20 +417,21 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 ```
 
-
+### Get Cost of Shipping  
+For our optimization, we need something to optimized. We are going to optimize shipping costs. Specifically, we will minimize costs.  
+We figured that shipping costs might come in two sub-costs. 1) labor to load and unload and 2) cost by mile to ship. Looking through some shipping websites, it is quickly discovered that costs decrease for longer shipping distances. After some trial and error, we came up with the following shipping cost function:  
+shipping cost (in dollars) = 100 (load and unload labor) + 100 *sqrt(distance)  
+It looks like this:  
 
 ```{r}
-library(ggmap)
-ggplot(data = us_states, mapping = aes(x = long, y = lat,
-                                       group = group)) +
-  geom_polygon(fill= "white", color = "black") +
-  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
-                                    size = from_population, color = "purple", alpha = 0.5),
-             inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
-  geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
-                                        yend = lat.to[5]), color = "blue", size = 0.3,
-               arrow = arrow(), inherit.aes = FALSE)
+m <- matrix(0, ncol = 2, nrow = 4000)
+dist <- data.frame(m)
+x <- c("Distance", "Cost")
+colnames(dist) <- x
+dist$Distance <- c(seq(1, 4000))
+dist$Cost <- sapply(dist$Distance, function(x) 100 + 15*sqrt(x))
+#head(dist)
+plot(dist$Distance,dist$Cost)
 
 ```
 
@@ -504,6 +505,22 @@ names(solution)[3] <- "# Cars Shipped"
 solution
 ```
 
+
+
+```{r}
+library(ggmap)
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
+                                        yend = lat.to[5]), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE)
+
+```
 
 
 

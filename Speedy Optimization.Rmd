@@ -444,7 +444,7 @@ INSERT Equation
 
 
 
-![adf in](Images/image1.png)
+
 
 $$\sum_{i=1}^n X_i$$
 
@@ -460,7 +460,7 @@ Show getting distances
 show results  
 
 Show Excel  
-
+![Trivial problem - 10 Cities, 1 hub](Images/10 C 1 H.png)
 
 
 #### Do it in R
@@ -521,6 +521,65 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
                arrow = arrow(), inherit.aes = FALSE)
 
 ```
+
+
+
+# 10 C 2 H
+
+equation  
+
+Show Excel  
+![Trivial problem - 10 Cities, 2 hubs](Images/10 C 2 H.png)
+
+R solution  
+
+# 10 C 2 H Choose 1 or the other
+
+equation  
+
+Show Excel  
+![Trivial problem - 10 Cities, 2 hubs](Images/10 C 1 H Choose 1.png)
+R solution  
+
+
+# 10 C 10 Hubs min cost
+
+equation  
+
+Show Excel  
+![Trivial problem - 10 Cities, 2 hubs](Images/10 C 10 H cannot do.png)
+
+Excel can't do this.  So we will come back to this
+
+# 6 C 6 Hubs min cost
+
+equation  
+
+Show Excel  
+![ - 6 Cities, 6 hubs](Images/6 C 6 H.png)
+
+R Solution
+
+no we can't really do much more in Excel with the internal solver.  There are commercial solvers that can do it.  But notice that it is a lot of work to keep adding each city to each hub path.
+
+# back to 10 C 10 H
+
+equation
+
+R solution
+
+# now 50 cities and X number of hubs
+
+You started with Houston and want to keep it.
+
+
+# now sensitivity analysis
+what if we change cost to ship, will that change cities hub?
+
+what if we add capital cost to build a new hub and it matches city population, we, of course , could do more in depth analysis for real estate and include that
+
+
+
 
 
 

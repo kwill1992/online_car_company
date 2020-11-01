@@ -8,6 +8,7 @@ library(dplyr)
 cities_raw <- read_csv("distances_my_top_50.csv")
 # Turn into a dataframe
 city_data <- as_tibble(cities_raw)
+get_supply <- as_tibble(cities_raw)
 # Add a number for each city 1 to 50
 city_data <- city_data %>% 
   add_column(num.from = 0, .after = 4) %>% 
@@ -43,6 +44,18 @@ city_data <- city_data %>%
   slice_head(n = num_cities) %>% 
   group_by(num.from)
   
+
+# redo number of cars from each city
+# get supply
+num_cars_month <- 4000
+#library(dplyr)
+get_supply <- get_supply %>% 
+  slice_head(n = num_cities) %>% 
+  #arrange(desc(Population)) %>% # sort Tibble by Population and descending
+  #slice_head(n = 11) %>% # Get only the first n rows.
+  mutate(to_pop_ratio = to_population / sum(to_population)) %>% # percent of Population
+  mutate(to_num_cars = round(to_pop_ratio * num_cars_month,0)) # Calc number cars moving each month
+
 # make into a cost matrix
 cost <- city_data$cost
 cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
@@ -60,9 +73,9 @@ library(ompr.roi)
 # cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
 # cost_m
 # Supply to move from each cities
-supply <- as.vector(city_data$`Number of cars Shipped From`[1:6])
+#supply <- as.vector(city_data$`Number of cars Shipped From`[1:6])
 # the above wasn't resized for 6 cities
-supply <- c(1224,841,603,482,449,400)
+supply <- as.vector(get_supply$to_num_cars)
 
 model <- MIPModel()  %>% 
   # Number of cars shiped from Xi to Xj

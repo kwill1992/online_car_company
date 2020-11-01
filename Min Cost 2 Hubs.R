@@ -61,4 +61,75 @@ result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 result
 get_solution(result, x[i,j])
 temp_df <- as_tibble(get_solution(result, x[i,j]))
+temp_df
 ### This works!!
+
+
+#result <- ROI_solve(model, solver = "glpk")
+#result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+#result
+#get_solution(result, x[i])
+cities_10 <- read_csv("distances_top_10.csv")
+solution <- as_tibble(get_solution(result, x[i,j]))
+library(dplyr)
+solution
+# Adds after the second column
+solution <- solution %>%
+  add_column(FROM_city = 0) %>% 
+  add_column(TO_city = 0) %>% 
+  add_column(lon.to = 0) %>%
+  add_column(lat.to = 0) %>%
+  add_column(lon.from = 0) %>%
+  add_column(lat.from = 0)
+from.column <- c(cities_10$to[1:10])
+to.column <- c("Houston, Texas", "Washington, District of Columbia")
+m <- 1
+n <- 0
+for (k in 1:2){
+  for (l in 1:10){
+    solution$FROM_city[m] <- from.column[l]
+    solution$lon.from[m] <- cities_10$lon.to[l]
+    solution$lat.from[m] <- cities_10$lat.to[l]
+    solution$TO_city[m] <- to.column[k]
+    solution$lon.to[m] <- cities_10$lon.to[5 + n]
+    solution$lat.to[m] <- cities_10$lat.to[5 + n]
+    m <- m + 1
+  }
+  n <- n + 1
+}
+
+### This works!!!
+# no clean it up
+solution <- solution %>% 
+  filter(value > 0)
+
+#### now map it ####
+library(tidyverse)
+
+
+# "us.cities" in maps package contains This database is of us cities of population
+# greater than about 40,000. Also included are state capitals of any 
+# population size.
+# "state" database produces a map of the states of the United States
+# mainland generated from US De- partment of the Census data
+library(maps)
+
+# Read in 10 city data with distances made in "Get Distances"
+cities_10 <- read_csv("distances_top_10.csv")
+
+# Get states for plotting state map
+us_states <- as_tibble(map_data("state"))
+
+
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
+                                     yend = lat.to), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE)
+
+

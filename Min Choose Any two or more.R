@@ -5,20 +5,47 @@ library(readr)
 library(tidyr)
 library(dplyr)
 # Read in .csv file and create Tibble DF.
-cities_raw <- read_csv("distances_top_10.csv")
+cities_raw <- read_csv("distances_my_top_50.csv")
 # Turn into a dataframe
-data <- as.data.frame(Network_Modeling)
+city_data <- as_tibble(cities_raw)
+# Add a number for each city 1 to 50
+city_data <- city_data %>% 
+  add_column(num.from = 0, .after = 4) %>% 
+  add_column(num.to = 0, .after = 6)
+  
+# number from and to numbers
+xx <- 1
+for (ii in 1:50){
+  for (jj in 1:50) {
+    city_data$num.from[xx] <- ii
+    city_data$num.to[xx] <- jj
+    xx <- xx + 1
+  }
+}
+
+
+# Choose number of cities to use
+num_cities <- 6
+
+#data <- as.data.frame(Network_Modeling)
 # Get top six in each set of TO and FROM
-city_data <- data %>% 
-  group_by(Num2) %>% 
-  slice_min(order_by = Num1, n = 6) %>% 
-  group_by(Num1) %>% 
-  slice_min(order_by = Num2, n = 6) %>% 
-  arrange(Num2)
+# city_data <- city_data %>% 
+#   group_by(num.from) %>%
+#   slice_min(order_by = num.from, n = num_cities) %>%
+#   group_by(num.to) %>%
+#   slice_min(order_by = num.to, n = num_cities) %>%
+#   arrange(num.from)
+
+city_data <- city_data %>% 
+  group_by(num.from) %>%
+  slice_head(n = num_cities) %>% 
+  group_by(num.to) %>% 
+  slice_head(n = num_cities) %>% 
+  group_by(num.from)
   
 # make into a cost matrix
-cost <- city_data$Cost
-cost_6_city <- matrix(cost, nrow = 6, byrow = FALSE)
+cost <- city_data$cost
+cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
 
 library(ompr)

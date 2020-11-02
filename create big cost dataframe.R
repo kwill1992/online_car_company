@@ -87,16 +87,16 @@ get_supply <- get_supply %>%
   mutate(to_pop_ratio = to_population / sum(to_population)) %>% # percent of Population
   mutate(to_num_cars = round(to_pop_ratio * num_cars_month,0)) # Calc number cars moving each month
 
-# make into a cost matrix
-cost <- city_data$cost
-cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
 
 supply <- as.vector(get_supply$to_num_cars)
 
+##### FOR medium cost per mile
+# make into a cost matrix
+cost <- city_data$cost
+cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
-
-num_hubs <- 2
+#num_hubs <- 2
 
 
 row <-1
@@ -134,10 +134,6 @@ for (num_hubs in 1:25){
   # for (col in 1:50) {
   #   final[row,4+col] <- get_solution(result, y[j])[col]
   # }
-  
-  
-  
-  
   #cities_10 <- read_csv("distances_top_10.csv")
   solution <- as_tibble(get_solution(result, x[i,j]))
   solution <- solution %>% 
@@ -168,6 +164,157 @@ for (num_hubs in 1:25){
   }
   #row <- row + 1
 }
+
+##### FOR high cost per mile
+cost <- city_data$cost3
+cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
+
+#num_hubs <- 2
+
+
+row <-76
+for (num_hubs in 1:25){
+  #num_hubs <-1
+  model <- MIPModel()  %>% 
+    # Number of cars shiped from Xi to Xj
+    add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
+    # Choose Houston (Y1) or Washington (Y2)
+    add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
+    #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
+    # minimize shipping cost
+    set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
+    # must use supply from each city
+    
+    ### fix this with J's, not 1 and 2
+    #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
+    # FIXED! works with j's
+    add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
+    # add this to keep Houston
+    #add_constraint(y[5] == 1) %>% 
+    add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
+    # add linking variables
+    # 1500 because the new limit should be 1224
+    add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
+  
+  #final$miles.func[num_hubs] <- "M"
+  #final$cost
+  #result <- ROI_solve(model, solver = "glpk")
+  result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+  #result
+  #final$cost[row] <- result[2]
+  #final$num.hubs[row] <- num_hubs
+  get_solution(result, x[i,j])
+  # for (col in 1:50) {
+  #   final[row,4+col] <- get_solution(result, y[j])[col]
+  # }
+  #cities_10 <- read_csv("distances_top_10.csv")
+  solution <- as_tibble(get_solution(result, x[i,j]))
+  solution <- solution %>% 
+    group_by(j) %>% 
+    summarise(value = sum(value))
+  #solution
+  
+  
+  library(dplyr)
+  # get hub solution
+  solution_hub <- as_tibble(get_solution(result, y[j]))
+  to.column <- as.vector(get_supply$to)
+  solution_hub <- solution_hub %>% 
+    add_column(Hub = 0)
+  solution_hub$Hub <- to.column
+  #solution_hub
+  for (f in 1:3){
+    final$miles.func[row] <- "H"
+    final$cost[row] <- result[2]
+    final$num.hubs[row] <- num_hubs
+    
+    for (col in 1:25) {
+      final[row,4+col] <- solution_hub$value[col]
+      final[row,29+col] <- solution$value[col]
+      
+    }
+    row <- row + 1
+  }
+  #row <- row + 1
+}
+
+
+##### FOR low cost per mile
+cost <- city_data$cost2
+cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
+
+#num_hubs <- 2
+
+
+row <-151
+for (num_hubs in 1:25){
+  #num_hubs <-1
+  model <- MIPModel()  %>% 
+    # Number of cars shiped from Xi to Xj
+    add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
+    # Choose Houston (Y1) or Washington (Y2)
+    add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
+    #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
+    # minimize shipping cost
+    set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
+    # must use supply from each city
+    
+    ### fix this with J's, not 1 and 2
+    #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
+    # FIXED! works with j's
+    add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
+    # add this to keep Houston
+    #add_constraint(y[5] == 1) %>% 
+    add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
+    # add linking variables
+    # 1500 because the new limit should be 1224
+    add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
+  
+  #final$miles.func[num_hubs] <- "L"
+  #final$cost
+  #result <- ROI_solve(model, solver = "glpk")
+  result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+  #result
+  #final$cost[row] <- result[2]
+  #final$num.hubs[row] <- num_hubs
+  get_solution(result, x[i,j])
+  # for (col in 1:50) {
+  #   final[row,4+col] <- get_solution(result, y[j])[col]
+  # }
+  #cities_10 <- read_csv("distances_top_10.csv")
+  solution <- as_tibble(get_solution(result, x[i,j]))
+  solution <- solution %>% 
+    group_by(j) %>% 
+    summarise(value = sum(value))
+  #solution
+  
+  
+  library(dplyr)
+  # get hub solution
+  solution_hub <- as_tibble(get_solution(result, y[j]))
+  to.column <- as.vector(get_supply$to)
+  solution_hub <- solution_hub %>% 
+    add_column(Hub = 0)
+  solution_hub$Hub <- to.column
+  #solution_hub
+  for (f in 1:3){
+    final$miles.func[row] <- "M"
+    final$cost[row] <- result[2]
+    final$num.hubs[row] <- num_hubs
+    
+    for (col in 1:25) {
+      final[row,4+col] <- solution_hub$value[col]
+      final[row,29+col] <- solution$value[col]
+      
+    }
+    row <- row + 1
+  }
+  #row <- row + 1
+}
+
+
+
+
 write_csv(final,"25_city_results.csv")
 
 

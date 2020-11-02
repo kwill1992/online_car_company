@@ -290,7 +290,11 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_polygon(fill= "white", color = "black") +
   geom_point(data = us_cities, aes( x = long, y = lat,
                                     size = pop, color = "purple", alpha = 0.5),
-             inherit.aes = FALSE)
+             inherit.aes = FALSE) +
+  
+  #coord_map("bonne", parameters=45) + 
+  ggthemes::theme_map() +
+theme(legend.position="bottom")
 ```
 
 To do: put legend at bottom.
@@ -347,7 +351,9 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_50, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_50, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) #+
+  geom_text(data = cities_50, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  theme(legend.position="bottom") #+
+  #coord_quickmap()
   # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
   #                                       yend = lat.to[5]), color = "blue", size = 0.3,
   #              arrow = arrow(), inherit.aes = FALSE)

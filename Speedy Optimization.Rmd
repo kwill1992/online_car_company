@@ -357,7 +357,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_50, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_50, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_50, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
   theme(legend.position="bottom") #+
   #coord_quickmap()
   # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
@@ -422,7 +422,9 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) #+
+  #geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  theme(legend.position="bottom")#+
   # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
   #                                       yend = lat.to[5]), color = "blue", size = 0.3,
   #              arrow = arrow(), inherit.aes = FALSE)
@@ -435,7 +437,7 @@ We figured that shipping costs might come in two sub-costs. 1) labor to load and
 shipping cost (in dollars) = 100 (load and unload labor) + 100 *sqrt(distance)  
 It looks like this:  
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 m <- matrix(0, ncol = 2, nrow = 4000)
 dist <- data.frame(m)
 x <- c("Distance", "Cost")
@@ -477,7 +479,7 @@ Show Excel
 
 #### Do it in R
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -507,19 +509,19 @@ model <- MIPModel()  %>%
 
 
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-get_solution(result, x[i])
+#result
+#get_solution(result, x[i])
 cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i]))
 solution$FROM_city <- c(cities_10$from[1:10])
 solution$TO_city <- "Houston, Texas"
 names(solution)[3] <- "# Cars Shipped"
-solution
+#solution
 ```
 
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 library(ggmap)
 ggplot(data = us_states, mapping = aes(x = long, y = lat,
                                        group = group)) +
@@ -527,7 +529,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  theme(legend.position="bottom") +
   geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
                                         yend = lat.to[5]), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE)
@@ -547,7 +550,7 @@ R solution
 
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -558,7 +561,7 @@ library(ompr.roi)
 cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
           326.04,874.85,496.92,646.68,662.94,100.00,586.57,277.47,478.96,819.49)
 cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
-cost_m
+#cost_m
 # Supply to move from each cities
 supply <- c(893,614,440,352,328,292,287,284,280,230)
 
@@ -580,10 +583,10 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
+#result
 get_solution(result, x[i,j])
 temp_df <- as_tibble(get_solution(result, x[i,j]))
-temp_df
+#temp_df
 ### This works!!
 
 
@@ -624,7 +627,7 @@ for (k in 1:2){
 # no clean it up
 solution <- solution %>% 
   filter(value > 0)
-solution
+#solution
 
 #### now map it ####
 library(tidyverse)
@@ -650,7 +653,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  theme(legend.position="bottom") +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                      yend = lat.to), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE)
@@ -668,7 +672,7 @@ Show Excel
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 1 H Choose 1.png)
 R solution  
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -802,7 +806,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  theme(legend.position="bottom") +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                     yend = lat.to), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE)
@@ -828,7 +833,7 @@ Show Excel
 
 R Solution
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
@@ -1065,7 +1070,7 @@ no we can't really do much more in Excel with the internal solver.  There are co
 ## Let's 10 C, best 2 hubs, with 1 Houston
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
@@ -1300,7 +1305,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ## Let's 10 C, best 2 hubs, any hubs
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
@@ -1435,15 +1440,15 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-get_solution(result, x[i,j])
-get_solution(result, y[j])
+#result
+#get_solution(result, x[i,j])
+#get_solution(result, y[j])
 
 
 
 #cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i,j]))
-solution
+#solution
 
 library(dplyr)
 # get hub solution
@@ -1452,7 +1457,7 @@ to.column <- as.vector(get_supply$to)
 solution_hub <- solution_hub %>% 
   add_column(Hub = 0)
 solution_hub$Hub <- to.column
-solution_hub
+#solution_hub
 
 # Adds after the second column
 solution <- solution %>%
@@ -1474,7 +1479,7 @@ for ( k in 1:length(city_data$lon.to)){
   #m < m + 1
 
 }
-solution
+#solution
 # from.column <- c(cities_10$to[1:10])
 # to.column <- c("Houston, Texas", "Washington, District of Columbia")
 # m <- 1
@@ -1541,7 +1546,7 @@ R solution
 ## Let's 50 C, best 2 hubs, with 1 Houston
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
@@ -1676,15 +1681,15 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-get_solution(result, x[i,j])
-get_solution(result, y[j])
+#result
+#get_solution(result, x[i,j])
+#get_solution(result, y[j])
 
 
 
 #cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i,j]))
-solution
+#solution
 
 library(dplyr)
 # get hub solution
@@ -1693,7 +1698,7 @@ to.column <- as.vector(get_supply$to)
 solution_hub <- solution_hub %>% 
   add_column(Hub = 0)
 solution_hub$Hub <- to.column
-solution_hub
+#solution_hub
 
 # Adds after the second column
 solution <- solution %>%
@@ -1715,7 +1720,7 @@ for ( k in 1:length(city_data$lon.to)){
   #m < m + 1
 
 }
-solution
+#solution
 # from.column <- c(cities_10$to[1:10])
 # to.column <- c("Houston, Texas", "Washington, District of Columbia")
 # m <- 1
@@ -1776,7 +1781,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ## Let's 50 C, best 2 hubs, any hubs
 
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
@@ -1911,15 +1916,15 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-get_solution(result, x[i,j])
-get_solution(result, y[j])
+#result
+#get_solution(result, x[i,j])
+#get_solution(result, y[j])
 
 
 
 #cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i,j]))
-solution
+#solution
 
 library(dplyr)
 # get hub solution
@@ -1928,7 +1933,7 @@ to.column <- as.vector(get_supply$to)
 solution_hub <- solution_hub %>% 
   add_column(Hub = 0)
 solution_hub$Hub <- to.column
-solution_hub
+#solution_hub
 
 # Adds after the second column
 solution <- solution %>%
@@ -1950,7 +1955,7 @@ for ( k in 1:length(city_data$lon.to)){
   #m < m + 1
 
 }
-solution
+#solution
 # from.column <- c(cities_10$to[1:10])
 # to.column <- c("Houston, Texas", "Washington, District of Columbia")
 # m <- 1

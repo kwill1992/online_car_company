@@ -26,7 +26,7 @@ for (ii in 1:50){
 
 
 # Choose number of cities to use
-num_cities <- 6
+num_cities <- 3
 
 #data <- as.data.frame(Network_Modeling)
 # Get top six in each set of TO and FROM

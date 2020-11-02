@@ -17,15 +17,15 @@ library(ompr.roi)
 # 3 rent functions
 # 3 cost miles functions
 # 50 hubs
-final <- as.data.frame(matrix(0, ncol = 155, nrow = 450))
+final <- as.data.frame(matrix(0, ncol = 80, nrow = 225))
 names(final)[1] <- "rent.func"
 names(final)[2] <- "miles.func"
 names(final)[3] <- "cost"
 names(final)[4] <- "num.hubs"
 names(final)[5] <- "Hubs.used"
-names(final)[55] <- "cars.shipped"
-names(final)[105] <- "cost.hubs"
-names(final)[155] <- "total.cost"
+names(final)[30] <- "cars.shipped"
+names(final)[55] <- "cost.hubs"
+names(final)[80] <- "total.cost"
 
 # Read in .csv file and create Tibble DF.
 cities_raw <- read_csv("distances_my_top_50.csv")
@@ -43,6 +43,7 @@ city_data <- city_data %>%
   add_column(num.from = 0, .after = 4) %>% 
   add_column(num.to = 0, .after = 6)
 
+
 # number from and to numbers
 xx <- 1
 for (ii in 1:50){
@@ -53,9 +54,16 @@ for (ii in 1:50){
   }
 }
 
+num_cities <- 25
+city_data <- city_data %>% 
+  group_by(num.from) %>%
+  slice_head(n = num_cities) %>% 
+  group_by(num.to) %>% 
+  slice_head(n = num_cities) %>% 
+  group_by(num.from)
 
 # Choose number of cities to use
-num_cities <- 50
+
 
 #data <- as.data.frame(Network_Modeling)
 # Get top six in each set of TO and FROM
@@ -66,12 +74,6 @@ num_cities <- 50
 #   slice_min(order_by = num.to, n = num_cities) %>%
 #   arrange(num.from)
 
-city_data <- city_data %>% 
-  group_by(num.from) %>%
-  slice_head(n = num_cities) %>% 
-  group_by(num.to) %>% 
-  slice_head(n = num_cities) %>% 
-  group_by(num.from)
 
 
 # redo number of cars from each city
@@ -94,59 +96,79 @@ supply <- as.vector(get_supply$to_num_cars)
 
 
 
-num_hubs <- 3
+num_hubs <- 2
 
-model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
-  add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
-  # Choose Houston (Y1) or Washington (Y2)
-  add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
-  #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
-  # minimize shipping cost
-  set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
-  # must use supply from each city
+
+row <-1
+for (num_hubs in 1:25){
+  #num_hubs <-1
+  model <- MIPModel()  %>% 
+    # Number of cars shiped from Xi to Xj
+    add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
+    # Choose Houston (Y1) or Washington (Y2)
+    add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
+    #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
+    # minimize shipping cost
+    set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
+    # must use supply from each city
+    
+    ### fix this with J's, not 1 and 2
+    #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
+    # FIXED! works with j's
+    add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
+    # add this to keep Houston
+    #add_constraint(y[5] == 1) %>% 
+    add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
+    # add linking variables
+    # 1500 because the new limit should be 1224
+    add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
   
-  ### fix this with J's, not 1 and 2
-  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-  # FIXED! works with j's
-  add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
-  # add this to keep Houston
-  #add_constraint(y[5] == 1) %>% 
-  add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
-  # add linking variables
-  # 1500 because the new limit should be 1224
-  add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
-
-
-#result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-result
-result[2]
-get_solution(result, x[i,j])
-get_solution(result, y[j])
-
-
-
-#cities_10 <- read_csv("distances_top_10.csv")
-solution <- as_tibble(get_solution(result, x[i,j]))
-solution <- solution %>% 
-  group_by(j) %>% 
-  summarise(value = sum(value))
-solution
-
-
-library(dplyr)
-# get hub solution
-solution_hub <- as_tibble(get_solution(result, y[j]))
-to.column <- as.vector(get_supply$to)
-solution_hub <- solution_hub %>% 
-  add_column(Hub = 0)
-solution_hub$Hub <- to.column
-solution_hub
-
-
-
-
+  #final$miles.func[num_hubs] <- "M"
+  #final$cost
+  #result <- ROI_solve(model, solver = "glpk")
+  result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+  #result
+  #final$cost[row] <- result[2]
+  #final$num.hubs[row] <- num_hubs
+  get_solution(result, x[i,j])
+  # for (col in 1:50) {
+  #   final[row,4+col] <- get_solution(result, y[j])[col]
+  # }
+  
+  
+  
+  
+  #cities_10 <- read_csv("distances_top_10.csv")
+  solution <- as_tibble(get_solution(result, x[i,j]))
+  solution <- solution %>% 
+    group_by(j) %>% 
+    summarise(value = sum(value))
+  #solution
+  
+  
+  library(dplyr)
+  # get hub solution
+  solution_hub <- as_tibble(get_solution(result, y[j]))
+  to.column <- as.vector(get_supply$to)
+  solution_hub <- solution_hub %>% 
+    add_column(Hub = 0)
+  solution_hub$Hub <- to.column
+  #solution_hub
+  for (f in 1:3){
+    final$miles.func[row] <- "M"
+    final$cost[row] <- result[2]
+    final$num.hubs[row] <- num_hubs
+    
+    for (col in 1:25) {
+      final[row,4+col] <- solution_hub$value[col]
+      final[row,29+col] <- solution$value[col]
+      
+    }
+    row <- row + 1
+  }
+  #row <- row + 1
+}
+write_csv(final,"25_city_results.csv")
 
 
 

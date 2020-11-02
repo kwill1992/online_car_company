@@ -298,7 +298,7 @@ for (num_hubs in 1:25){
   solution_hub$Hub <- to.column
   #solution_hub
   for (f in 1:3){
-    final$miles.func[row] <- "M"
+    final$miles.func[row] <- "L"
     final$cost[row] <- result[2]
     final$num.hubs[row] <- num_hubs
     
@@ -311,11 +311,17 @@ for (num_hubs in 1:25){
   }
   #row <- row + 1
 }
+final <- as.data.frame(final)
 
+typeof(final[3,3][[1]])
+final[2,3][[1]]
+final[3,2][[1]]
 
-
-
-write_csv(final,"25_city_results.csv")
+for (fix in 1:225){
+  final$newcost[fix] <- final[fix,3][[1]]
+}
+final2 <- final[ -c(3) ]
+write_csv(final2,"25_city_results.csv")
 
 
 

@@ -131,6 +131,25 @@ names(distances)[2] <- "lat.to"
 # Cost(in $) == 100 + 15*sqrt(dist)
 distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
+#distances <- read_csv("distances_top_6.csv")
+distances <- distances %>%
+  add_column(from.short = NA) %>% 
+  add_column(to.short = NA)
+for (i in 1:length(distances$from)){
+  if (distances$from[i] == "Washington, District of Columbia") {
+    distances$from.short[i] <- "Washington"
+  } else {
+    distances$from.short[i] <- sub(',.*', '', distances$from[i])
+  }
+}
+for (i in 1:length(distances$from)){
+  if (distances$to[i] == "Washington, District of Columbia") {
+    distances$to.short[i] <- "Washington"
+  } else {
+    distances$to.short[i] <- sub(',.*', '', distances$to[i])
+  }
+}
+
 write_csv(distances,"distances_top_6.csv")
 
 
@@ -183,6 +202,25 @@ names(distances)[2] <- "lat.to"
 # Cost(in $) == 100 + 15*sqrt(dist)
 distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
+#distances <- read_csv("distances_top_10.csv")
+distances <- distances %>%
+  add_column(from.short = NA) %>% 
+  add_column(to.short = NA)
+for (i in 1:length(distances$from)){
+  if (distances$from[i] == "Washington, District of Columbia") {
+    distances$from.short[i] <- "Washington"
+  } else {
+    distances$from.short[i] <- sub(',.*', '', distances$from[i])
+  }
+}
+for (i in 1:length(distances$from)){
+  if (distances$to[i] == "Washington, District of Columbia") {
+    distances$to.short[i] <- "Washington"
+  } else {
+    distances$to.short[i] <- sub(',.*', '', distances$to[i])
+  }
+}
+
 write_csv(distances,"distances_top_10.csv")
 
 
@@ -233,6 +271,25 @@ names(distances)[2] <- "lat.to"
 # Cost(in $) == 100 + 15*sqrt(dist)
 distances$cost <- sapply(distances$distance, function(x) 100 + 15*sqrt(x))
 # Save to .csv file
+#distances <- read_csv("distances_my_top_50.csv")
+distances <- distances %>%
+  add_column(from.short = NA) %>% 
+  add_column(to.short = NA)
+for (i in 1:length(distances$from)){
+  if (distances$from[i] == "Washington, District of Columbia") {
+    distances$from.short[i] <- "Washington"
+  } else {
+    distances$from.short[i] <- sub(',.*', '', distances$from[i])
+  }
+}
+for (i in 1:length(distances$from)){
+  if (distances$to[i] == "Washington, District of Columbia") {
+    distances$to.short[i] <- "Washington"
+  } else {
+    distances$to.short[i] <- sub(',.*', '', distances$to[i])
+  }
+}
+
 write_csv(distances,"distances_my_top_50.csv")
 
 

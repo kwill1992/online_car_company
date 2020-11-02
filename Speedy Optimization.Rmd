@@ -277,6 +277,7 @@ library(ggplot2)
 # "state" database produces a map of the states of the United States
 # mainland generated from US De- partment of the Census data
 library(maps)
+library(scales)
 
 us_states <- as_tibble(map_data("state"))
 us_cities <- as_tibble(us.cities)
@@ -289,8 +290,13 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
                                        group = group)) +
   geom_polygon(fill= "white", color = "black") +
   geom_point(data = us_cities, aes( x = long, y = lat,
-                                    size = pop, color = "purple", alpha = 0.5),
+                                    size = pop, color = "red", alpha = 0.5),
              inherit.aes = FALSE) +
+  guides(alpha = FALSE) +
+  guides(color = FALSE) +
+  scale_size("Population", labels = comma) +
+  #scale_color_gradient2(midpoint=6500000,
+  #                    low="blue", high="red" ) +
   
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +

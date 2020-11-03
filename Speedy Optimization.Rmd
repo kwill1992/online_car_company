@@ -447,9 +447,10 @@ dist$Distance <- c(seq(1, 4000))
 dist$Cost <- sapply(dist$Distance, function(x) 100 + 15*sqrt(x))
 #head(dist)
 plot(dist$Distance,dist$Cost, xlab = "Distance (miles)", ylab = "Cost ($)",
-     title("Shipping Cost Function"))
+     title("Shipping Cost Function"))  
 
 ```
+  
 ### Optimize shipping costs between 10 cities and Houston  
 Now we are getting close to modeling something. For our first optimization, we will optimize the number of vehicles to ship from each of the 10 cities to the 1 hub, Houston. This, of course, is a trivial problem. But let's work it anyway.  
 
@@ -459,19 +460,14 @@ $$st: X_i \ge S_i~~~\forall i,~i=1~to~10$$
 $$X_i \ge 0~~~\forall i,~i=1~to~10$$
 
 $$X \in Integers$$
-~where C is the cost from each city to Houston, where X is the calculated number of vehicles to move from each city to Houston, & where S is the number of vehicles shipped from each city to Houston.
-$$x \ge 15$$
-$$a_i \ge 0~~~\forall i$$
-$$x \in A$$
+~where C is the cost from each city to Houston, where X is the calculated number of vehicles to move from each city to Houston, and where S is the number of vehicles shipped from each city to Houston.  
 
-$$X_{i,j}$$
-  
 ### Calculate shipping costs  
 We have identified the shipping cost function, but we didn't actually calculate shipping costs yet.  
 We need the distances between each city and a potential hub. For this trivial problem, we could probably just go to Google Maps or some similar website and find 9 distances from each city to Houston (distance to Houston from Houston = 0. :) But the cost isn't $0 in our model. There is a cost for loading and unloading at least.  
 For this problem, we will consider the shipping distance from in and around Houston to our hub in Houstan as 0 even though it wouldn't actually be that. But the minimum $100 should cover that.  
 Getting the distance from Google Maps for driving from New York to Houston and entering that data took about 20 seconds. Doing that 10 times isn't a big deal. But we need the distances between 50 cities.  That's 49 + 48 + 47 + 46... well, you get the idea.
-Fortunately, there is an easier way: Google API Vhttps://cloud.google.com/maps-platform/ There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes. By "hand" would have taken 6-7 hours possibly.    
+**Fortunately, there is an easier way: Google API https://cloud.google.com/maps-platform/**There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but **a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes. By "hand" would have taken 6-7 hours possibly.**    
 Now we have the distance between each city and Houston (and every other data pair) and the cost function. We easily calculate the cost between each city.  
 
 #### Optimization in Excel  
@@ -481,13 +477,14 @@ MS Excel has a limited Solver included with the regular version of Excel. Next i
 ![Trivial problem - 10 Cities, 1 hub](Images/10 C 1 H.png)
 Excel has solved this trivial problem at a cost of $2,318,286.98. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  
 
-#### Do it in R  
-Below are results from this problem solved via MILP optimization in R.  
+#### Optimization in R  
+Below are the raw results from this problem solved via MILP optimization in R.  
 The first box shows that the solver found an optimal solution and what it is.  
-The second box are the formal results.  
+The second box are more formal results.  
 The third box shows the number of cars shipped between each city.  
 
 ```{r warning= FALSE, message = FALSE}
+library(tidyverse)
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -562,22 +559,21 @@ $$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
 $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
 $$X \in Integers$$
-~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.
-$$x \ge 15$$
-$$a_i \ge 0~~~\forall i$$
-$$x \in A$$
+~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, and where S is the number of vehicles shipped from each city to Houston.  
 
-$$X_{i,j}$$  
- #### Solution in Excel  
+#### Solution in Excel  
 
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 2 H.png)
-Excel has solved this trivial problem at a cost of $xxxx. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs.  
+Excel has solved this trivial problem at a cost of $xxxx. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs by looking in the Ship column. You can see some numbers going to Houston and some to Washington.  
   
-#### R solution  
+#### Solution in R  
 
-
-
+The first box below shows the optimal solution as cost in dollars to ship each month.  
+The second box shows the raw result for each city to hub pair. Right now, there are only 20 options. Row 2 has X, i=2, j=1, value = 614. These means 614 cars shipped from Los Angeles metro area (i=2) to Houston (j=1). This will get overwhelmning with larger problems so this format won't be shown again.  
+The third box is the shipping solution cleaned up a bit.  
 ```{r warning= FALSE, message = FALSE}
+library(tidyverse)
+library(scales)
 library(ompr)
 library(magrittr)
 library(ROI)
@@ -650,11 +646,14 @@ for (k in 1:2){
   n <- n + 1
 }
 
-### This works!!!
-# no clean it up
 solution <- solution %>% 
   filter(value > 0)
-solution
+### This works!!!
+# no clean it up
+solution_display <- solution %>% 
+  filter(value > 0) %>% 
+  select(variable, i, j, value, FROM_city, TO_city)
+solution_display
 
 #### now map it ####
 library(tidyverse)
@@ -711,17 +710,15 @@ $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 $$X \in Integers$$
 $$ Y \in 0~or~1$$
 ~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.  
+These two constraints are added: $\sum_{j=1}^{2}Y_j=1$ and $X_{i,j} \le MAX(S)*Y_j$ and are very important to link the new variable $Y$, which is a binary, to the shipping variable $X$.  
 
-$$x \ge 15$$
-$$a_i \ge 0~~~\forall i$$
-$$x \in A$$
 
-$$X_{i,j}$$  
 #### Solution in Excel  
 
   
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 1 H Choose 1.png)
-Above you can see that all of the cities shipped all of their cars to the Washington, D.C. hub. They ALL had to choose to the same hub. If they had chosen Houston, that would have meant that it would have cost more to ship there than DC. But they chose DC, which means that this solution must have been cheaper than Houston. And it was: $2,090,968.  
+Above you can see that all of the cities shipped all of their cars to the Washington, D.C. hub. They ALL had to choose to the same hub. If they had chosen Houston, that would have meant that it would have cost more to ship there than DC. But they chose DC, which means that this solution must have been cheaper than Houston. And it was: $2,090,968 for shipping all to Washington, vs.  
+$2,318,287 for shipping all to Houston.  
 
 #### R solution  
 
@@ -736,7 +733,7 @@ library(ompr.roi)
 cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
           326.04,874.85,496.92,646.68,662.94,100.00,586.57,277.47,478.96,819.49)
 cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
-cost_m
+#cost_m
 # Supply to move from each cities
 supply <- c(893,614,440,352,328,292,287,284,280,230)
 
@@ -762,15 +759,15 @@ model <- MIPModel()  %>%
   # add_constraint(x[i,2] <= 1000*y[2], i = 1:10)
 
 #result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
 result
-get_solution(result, x[i,j])
-get_solution(result, y[j])
+#get_solution(result, x[i,j])
+#get_solution(result, y[j])
 
 
 cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i,j]))
-solution
+#solution
 
 library(dplyr)
 # get hub solution
@@ -805,11 +802,14 @@ for (k in 1:2){
   }
   n <- n + 1
 }
-
-### This works!!!
-# no clean it up
 solution <- solution %>% 
   filter(value > 0)
+### This works!!!
+# no clean it up
+solution_display <- solution %>% 
+  filter(value > 0) %>% 
+  select(variable, i, j, value, FROM_city, TO_city)
+solution_display
 
 
 

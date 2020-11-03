@@ -323,8 +323,37 @@ for (fix in 1:225){
 final2 <- final[ -c(3) ]
 write_csv(final2,"25_city_results.csv")
 
+
+### Fix H, M, L for cost column
+final2 <- read_csv("25_city_results.csv")
+# for (fix2 in 151:225){
+#   final2$miles.func[fix2] <- "L"
+# }
+# write_csv(final2,"25_city_results.csv")
+final2[1,2]
+row,column
+for (iii in 1:25){
+  final2$rent.func[iii] <- "H"
+  counter <- 29
+  for(jjj in 54:78){
+    rent <- 20*30*ceiling()
+    counter <- counter + 1
+  }
+}
+
+ceiling(.1)
+
+#### add rent function
+final
+
+
+
+
 plot(final2$num.hubs,final2$newcost)
 length(final2$num_hubs)
+
+
+
 
 
 # Adds after the second column

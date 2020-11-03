@@ -1633,16 +1633,42 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 
 
-You started with Houston and want to keep it.
 
 
-# now sensitivity analysis
-what if we change cost to ship, will that change cities hub?
+
+# Sensitivity Analysis  
+  
+Some possible questions we'd like to answer:  
+
+What if we change cost to ship, will that change which hubs are chosen?  
+What if we add a cost function for the actual hub? How will that affect the outcome?  
+
+Two additional shipping cost functions were tried as shown below:  
+$$Cost(Dollars) = 150 + 150\sqrt{miles}$$  
+$$Cost(Dollars) = 50 + 50\sqrt{miles}$$  
+There will be referred to as: "High" and "Low".  And the original "Med" shown below:
+$$Cost(Dollars) = 100 + 100\sqrt{miles}$$  
+
+For a hub rental function, the following might be needed:  
+Mechanical inspection: each bay could do 2 cars a day (round up) (at least 20'x30')  
+Clean and prep: each bay could do 2 cars a day (round up) (at least 15'x30')  
+Heavy mechanical repair[only 10% of cars]: each bay could do 0.5 cars a day (round up) (at least 20'x30')  
+Photo booth: each bay could do 4 cars a day (round up) (at least 20'x30')  
+Foreman offices: 30' by 30'
+20 workdays a month
+
+$$B = 20*30*\frac{N_{cars}}{2} + 15*30*\frac{N_{cars}}{2} + 20*30*2*\frac{N_{cars}}{10} + 20*30*\frac{N_{cars}}{4} + 30*30$$
+~ where $B$ = sqft of building needed, $N_{cars}$ = number of cars per month/20, [rounded up to next whole number for each work case].  
+A quick search for leasing auto mechanical space in Maryland yielded rates between 75cents/sqft to $3/sqft. We'll used three levels:
+High: $3 per sqft
+Med: $1.75 per sqft
+Low: $0.75 per sqft  
+
 
 what if we add capital cost to build a new hub and it matches city population, we, of course , could do more in depth analysis for real estate and include that
 
 
-
+$\frac{a}{b}$
 
 
 

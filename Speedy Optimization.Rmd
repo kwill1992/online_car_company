@@ -567,11 +567,12 @@ $$x \ge 15$$
 $$a_i \ge 0~~~\forall i$$
 $$x \in A$$
 
-$$X_{i,j}$$
+$$X_{i,j}$$  
  #### Solution in Excel  
 
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 2 H.png)
 Excel has solved this trivial problem at a cost of $xxxx. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs.  
+  
 #### R solution  
 
 
@@ -684,20 +685,45 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                      yend = lat.to), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE) +
+  guides(alpha = FALSE) +
+  guides(color = FALSE) +
+  scale_size("Population", labels = comma) +
+  #scale_color_gradient2(midpoint=6500000,
+  #                    low="blue", high="red" ) +
+  
+  #coord_map("bonne", parameters=45) + 
+  ggthemes::theme_map() +
+
   labs(title = "Visual Solution for 10 Cities and 2 Hubs")
 
 ```
 
 
+### Let's try an optimization between 10 cities and 2 hubs but we have to choose one or the other, not either one, i.e. only one hub will used
 
+The optimization problem looks like this:
+$$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
+$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
+$$ \sum_{j=1}^{2}Y_j=1$$
+$$X_{i,j} \le MAX(S)*Y_j,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
+$$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
-# 10 C 2 H Choose 1 or the other
+$$X \in Integers$$
+$$ Y \in 0~or~1$$
+~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.  
 
-equation  
+$$x \ge 15$$
+$$a_i \ge 0~~~\forall i$$
+$$x \in A$$
 
-Show Excel  
+$$X_{i,j}$$  
+#### Solution in Excel  
+
+  
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 1 H Choose 1.png)
-R solution  
+Above you can see that all of the cities shipped all of their cars to the Washington, D.C. hub. They ALL had to choose to the same hub. If they had chosen Houston, that would have meant that it would have cost more to ship there than DC. But they chose DC, which means that this solution must have been cheaper than Houston. And it was: $2,090,968.  
+
+#### R solution  
 
 ```{r warning= FALSE, message = FALSE}
 library(ompr)
@@ -734,28 +760,6 @@ model <- MIPModel()  %>%
   add_constraint(x[i,j] <= 1000*y[j], i = 1:10, j = 1:2)
   # add_constraint(x[i,1] <= 1000*y[1], i = 1:10) %>% 
   # add_constraint(x[i,2] <= 1000*y[2], i = 1:10)
-  # 
-  # # Not working
-  # add_constraint(x[1,1] <= 1000*y[1]) %>% 
-  # add_constraint(x[2,1] <= 1000*y[1]) %>%
-  # add_constraint(x[3,1] <= 1000*y[1]) %>%
-  # add_constraint(x[4,1] <= 1000*y[1]) %>%
-  # add_constraint(x[5,1] <= 1000*y[1]) %>%
-  # add_constraint(x[6,1] <= 1000*y[1]) %>%
-  # add_constraint(x[7,1] <= 1000*y[1]) %>%
-  # add_constraint(x[8,1] <= 1000*y[1]) %>%
-  # add_constraint(x[9,1] <= 1000*y[1]) %>%
-  # add_constraint(x[10,1] <= 1000*y[1]) %>%
-  # add_constraint(x[1,2] <= 1000*y[2]) %>%
-  # add_constraint(x[2,2] <= 1000*y[2]) %>%
-  # add_constraint(x[3,2] <= 1000*y[2]) %>%
-  # add_constraint(x[4,2] <= 1000*y[2]) %>%
-  # add_constraint(x[5,2] <= 1000*y[2]) %>%
-  # add_constraint(x[6,2] <= 1000*y[2]) %>%
-  # add_constraint(x[7,2] <= 1000*y[2]) %>%
-  # add_constraint(x[8,2] <= 1000*y[2]) %>%
-  # add_constraint(x[9,2] <= 1000*y[2]) %>%
-  # add_constraint(x[10,2] <= 1000*y[2]) 
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
@@ -837,19 +841,41 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   theme(legend.position="bottom") +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                     yend = lat.to), color = "blue", size = 0.3,
-               arrow = arrow(), inherit.aes = FALSE)
+               arrow = arrow(), inherit.aes = FALSE) +
+  guides(alpha = FALSE) +
+  guides(color = FALSE) +
+  scale_size("Population", labels = comma) +
+  #scale_color_gradient2(midpoint=6500000,
+  #                    low="blue", high="red" ) +
+  
+  #coord_map("bonne", parameters=45) + 
+  ggthemes::theme_map() +
+
+  labs(title = "Visual Solution for 10 Cities and a Choice Between 2 Hubs: Houston and Washington")
+
 
 ```
 
 
-# 10 C 10 Hubs min cost
+### 10 Cities, Up To 10 Hubs  
+Now we have our basic ideas down, we can scale up. We can set up to choose the number of hubs between 1 and 10 and then solve.
 
-equation  
+The optimization problem looks like this:
+$$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
+$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
+$$ \sum_{j=1}^{2}Y_j=NumHubs$$
+$$X_{i,j} \le MAX(S)*Y_j,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
+$$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
-Show Excel  
+$$X \in Integers$$
+$$ Y \in 0~or~1$$
+~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.  
+
+
+#### Solution in Excel  
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 10 H cannot do.png)
+As you can see, Excel can't do this. We have quickly reached the limit of what the internal Solver than came with Excel can do. There are commercial add-ins to Excel that can be purchased that will allow bigger optimization problems. But we can keep going with R.
 
-Excel can't do this.  So we will come back to this
 
 # 6 C 6 Hubs min cost
 

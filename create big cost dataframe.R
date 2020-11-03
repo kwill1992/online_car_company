@@ -323,8 +323,8 @@ for (fix in 1:225){
 final2 <- final[ -c(3) ]
 write_csv(final2,"25_city_results.csv")
 
-
-
+plot(final2$num.hubs,final2$newcost)
+length(final2$num_hubs)
 
 
 # Adds after the second column

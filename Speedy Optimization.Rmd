@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### MILP Optimization will be conducted using R and Microsoft Excel.  
 
-### Step 1: Gather population data  
+### Step 1: Gather and present population data  
 In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, where will the vehicles be coming from and going to? Where the people are! Let's get US population data by county or city.  
 There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.  
 
@@ -301,21 +301,18 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
        subtitle = "For All U.S. Cities With Greater Than 40,000 People")
 ```
 
-To do: put legend at bottom.
-Maybe use previous map
-change colors of each size
 
 
-The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston New York, Washington D.C., Miami, etc... are clearly shown better.
+The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston, New York, Washington D.C., Miami, etc... are clearly shown better.
 
 In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. That is doable for advanced commercial optimization algorithms, but too many for what we want to do and certainly too many for the Solver that comes with MS Excel.  
 
-### Modeling our business    
-In our fictional sales company, it is in the early growth stage. 
+### Modeling the Speedy Car Sales business    
+For this fictional sales company, it is in the early growth stage. 
 
-For this stage, we will assume they have just one hub and are looking to expand. The car company started in Houston, TX and that is where their distribution center is. 
+At this stage, we will assume they have just one hub and are looking to expand. The car company started in Houston, TX and that is where their distribution center is. 
 
-For this next phase however, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.  If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
+For this next phase however, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
 
 After some data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six (out of 50) of our data set looks like this below:
 ```{r warning= FALSE, message = FALSE}
@@ -327,7 +324,7 @@ cities_raw <- read_csv("my_top_50.csv")
 head(cities_raw)
 ```
 
-### show map with 50 cities
+### Display top 50 metro areas
 
 ```{r warning= FALSE, message = FALSE}
 #### now map it ####
@@ -363,25 +360,23 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
-  theme(legend.position="bottom") #+
+  theme(legend.position="bottom") +
+  labs(title = "U.S. Population By Metro Area", 
+       subtitle = "Using U.S. Definition of Metro Area")
 
 ```
 
 
 Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to calculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
 
-In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking. The company did $1.6B in sales in 2019. With an average selling price of 
-$30000 per vehicle, that is xxxx a year and xxx a month.  Let's assume they are growing. That is 
-4,000 cars a month.
+In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking! The company did $1.2B in sales in 2019. With an average selling price of 
+$30000 per vehicle, that is 40,000 vehicles a year and 3,333 a month.  Let's assume they are growing. That is how we get 4,000 cars a month.
 
-We 
+We are going to start with a small problem are work towards bigger problems. So we will start with the 10 largest metro areas.
 
+For this optimization, we have 10 cities and 1 hub (Houston, TX). As mentioned earlier, the amount of buying and selling is related to the population. We model sales locations simply by the ratio of populations. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales of LA.
 
-We want to start with a small problem to make sure we are doing it correctly so will use the 10 largest metro areas.
-
-For this optimization, we have 10 cities and 1 hub. As mentioned earlier, the amount of buying and selling is related to the population. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales of LA.
-
-For our 50, we filter to the top 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
+From our 50, we filter to the largest 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
 Here is our result:
 ```{r warning= FALSE, message = FALSE}
 cities_10 <- read_csv("distances_top_10.csv")
@@ -391,11 +386,6 @@ cities_10 %>%
 ```
 
 
-
-
-
-
-### show map with 10 cities
 ```{r warning= FALSE, message = FALSE}
 #### now map it ####
 library(tidyverse)
@@ -433,17 +423,19 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
 
-  theme(legend.position="bottom")#+
-  # geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
-  #                                       yend = lat.to[5]), color = "blue", size = 0.3,
-  #              arrow = arrow(), inherit.aes = FALSE)
+  theme(legend.position="bottom") +
+  labs(title = "10 Large Metro Areas in the U.S.")
+
 
 ```
 
-### Get Cost of Shipping  
-For our optimization, we need something to optimized. We are going to optimize shipping costs. Specifically, we will minimize costs.  
+### Get the cost of shipping  
+For our optimization, well, we need something to optimized. We are going to optimize shipping costs. Specifically, we will minimize costs.  
 We figured that shipping costs might come in two sub-costs. 1) labor to load and unload and 2) cost by mile to ship. Looking through some shipping websites, it is quickly discovered that costs decrease for longer shipping distances. After some trial and error, we came up with the following shipping cost function:  
-shipping cost (in dollars) = 100 (load and unload labor) + 100 *sqrt(distance)  
+Shipping Cost (in dollars) = 100 (flat rate to load and unload) + 100 *sqrt(distance)  
+$$
+Cost(Dollars) = 100 + 100\sqrt{miles}
+$$
 It looks like this:  
 
 ```{r warning= FALSE, message = FALSE}
@@ -459,18 +451,27 @@ plot(dist$Distance,dist$Cost, xlab = "Distance (miles)", ylab = "Cost ($)",
 
 ```
 
+Now we are getting close to modeling something. For our first optimization, we will optimize the number of vehicles to ship from each of the 10 cities to the 1 hub, Houston. This, of course, is a trivial problem. But let's work it anyway.  
 
-### first look, 10 C, 1H
+The optimizatin problem looks like this:
+$$min\sum_{i=1}^{10} C_iX_i$$
+$$st: X_i \ge S_i~~~\forall i$$
+$$X_i \ge 0~~~\forall i,~i=1~to~10$$
 
-For optimization, 
+$$x \in Integers$$
+~where C is the cost from each hub to Houston, where X is the calculated number of vehicles to move from each hub to Houston, & where S is the number of vehicles shipped from each hub to Houston.
+$$x \ge 15$$
+$$a_i \ge 0~~~\forall i$$
+$$x \in A$$
 
-INSERT Equation
-
-
-
-
-
-$$\sum_{i=1}^n X_i$$
+$$X_{i,j}$$
+### Calculate shipping costs  
+We have identified the shipping cost function, but we didn't actually calculate shipping costs yet.  
+We need the distances between each city and a potential hub. For this trivial problem, we could probably just go to Google Maps or some similar website and find 9 distances from each city to Houston (distance to Houston from Houston = 0. :) But the cost isn't $0 in our model. There is a cost for loading and unloading at least.  
+For this problem, we will consider the shipping distance from in and around Houston to our hub in Houstan as 0 even though it wouldn't actually be that. But the minimum $100 should cover that.  
+Getting the distance from Google Maps for driving from New York to Houston and entering that data took about 20 seconds. Doing that 10 times isn't a big deal. But we need the distances between 50 cities.  That's 49 + 48 + 47 + 46... well, you get the idea.
+Fortunately, there is an easier way: Google API Vhttps://cloud.google.com/maps-platform/ There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes.  
+Now we have the distance between each city and Houston (and every other data pair) and the cost function. We easily calculate the cost between each city.  
 
 
 *** Insert image of Excel

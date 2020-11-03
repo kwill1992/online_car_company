@@ -20,11 +20,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### MILP Optimization will be conducted using R and Microsoft Excel.  
 
-### Step 1: Gather and present population data  
+### Gather and present population data  
 In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, where will the vehicles be coming from and going to? Where the people are! Let's get US population data by county or city.  
 There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.  
 
-### Display population by county
+### Display population by county  
 ```{r dpi = 150, warning= FALSE, message = FALSE}
 if (! file.exists("PEP_2018_PEPANNRES.zip")) {
   download.file("http://www.stat.uiowa.edu/~luke/data/PEP_2018_PEPANNRES.zip",
@@ -450,45 +450,42 @@ plot(dist$Distance,dist$Cost, xlab = "Distance (miles)", ylab = "Cost ($)",
      title("Shipping Cost Function"))
 
 ```
-
+### Optimize shipping costs between 10 cities and Houston  
 Now we are getting close to modeling something. For our first optimization, we will optimize the number of vehicles to ship from each of the 10 cities to the 1 hub, Houston. This, of course, is a trivial problem. But let's work it anyway.  
 
-The optimizatin problem looks like this:
+The optimization problem looks like this:
 $$min\sum_{i=1}^{10} C_iX_i$$
-$$st: X_i \ge S_i~~~\forall i$$
+$$st: X_i \ge S_i~~~\forall i,~i=1~to~10$$
 $$X_i \ge 0~~~\forall i,~i=1~to~10$$
 
-$$x \in Integers$$
-~where C is the cost from each hub to Houston, where X is the calculated number of vehicles to move from each hub to Houston, & where S is the number of vehicles shipped from each hub to Houston.
+$$X \in Integers$$
+~where C is the cost from each city to Houston, where X is the calculated number of vehicles to move from each city to Houston, & where S is the number of vehicles shipped from each city to Houston.
 $$x \ge 15$$
 $$a_i \ge 0~~~\forall i$$
 $$x \in A$$
 
 $$X_{i,j}$$
+  
 ### Calculate shipping costs  
 We have identified the shipping cost function, but we didn't actually calculate shipping costs yet.  
 We need the distances between each city and a potential hub. For this trivial problem, we could probably just go to Google Maps or some similar website and find 9 distances from each city to Houston (distance to Houston from Houston = 0. :) But the cost isn't $0 in our model. There is a cost for loading and unloading at least.  
 For this problem, we will consider the shipping distance from in and around Houston to our hub in Houstan as 0 even though it wouldn't actually be that. But the minimum $100 should cover that.  
 Getting the distance from Google Maps for driving from New York to Houston and entering that data took about 20 seconds. Doing that 10 times isn't a big deal. But we need the distances between 50 cities.  That's 49 + 48 + 47 + 46... well, you get the idea.
-Fortunately, there is an easier way: Google API Vhttps://cloud.google.com/maps-platform/ There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes.  
+Fortunately, there is an easier way: Google API Vhttps://cloud.google.com/maps-platform/ There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes. By "hand" would have taken 6-7 hours possibly.    
 Now we have the distance between each city and Houston (and every other data pair) and the cost function. We easily calculate the cost between each city.  
 
+#### Optimization in Excel  
+MS Excel has a limited Solver included with the regular version of Excel. Next is a screenshot of this problem solved using the Excel optimization function.  
 
-*** Insert image of Excel
-
-
-First we need cost of shipping:  
-
-Show equation
-
-Show getting distances  
-show results  
-
-Show Excel  
+ 
 ![Trivial problem - 10 Cities, 1 hub](Images/10 C 1 H.png)
+Excel has solved this trivial problem at a cost of $2,318,286.98. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  
 
-
-#### Do it in R
+#### Do it in R  
+Below are results from this problem solved via MILP optimization in R.  
+The first box shows that the solver found an optimal solution and what it is.  
+The second box are the formal results.  
+The third box shows the number of cars shipped between each city.  
 
 ```{r warning= FALSE, message = FALSE}
 library(ompr)
@@ -520,14 +517,14 @@ model <- MIPModel()  %>%
 
 
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-#result
+result
 #get_solution(result, x[i])
 cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i]))
 solution$FROM_city <- c(cities_10$from[1:10])
 solution$TO_city <- "Houston, Texas"
 names(solution)[3] <- "# Cars Shipped"
-#solution
+solution
 ```
 
 
@@ -552,21 +549,30 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #                    low="blue", high="red" ) +
   
   #coord_map("bonne", parameters=45) + 
-  ggthemes::theme_map()
+  ggthemes::theme_map() +
+  labs(title = "Visual of Solution Showing Arrows Indicating Shipping")
 
 
 ```
 
+### Let's try an optimization between 10 cities and 2 hubs
+The optimization problem looks like this:
+$$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
+$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
+$$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
+$$X \in Integers$$
+~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.
+$$x \ge 15$$
+$$a_i \ge 0~~~\forall i$$
+$$x \in A$$
 
-# 10 C 2 H
+$$X_{i,j}$$
+ #### Solution in Excel  
 
-equation  
-
-Show Excel  
 ![Trivial problem - 10 Cities, 2 hubs](Images/10 C 2 H.png)
-
-R solution  
+Excel has solved this trivial problem at a cost of $xxxx. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs.  
+#### R solution  
 
 
 
@@ -602,8 +608,8 @@ model <- MIPModel()  %>%
 # add linking variables
 
 #result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-#result
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
+result
 get_solution(result, x[i,j])
 temp_df <- as_tibble(get_solution(result, x[i,j]))
 #temp_df
@@ -647,7 +653,7 @@ for (k in 1:2){
 # no clean it up
 solution <- solution %>% 
   filter(value > 0)
-#solution
+solution
 
 #### now map it ####
 library(tidyverse)
@@ -677,7 +683,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   theme(legend.position="bottom") +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                      yend = lat.to), color = "blue", size = 0.3,
-               arrow = arrow(), inherit.aes = FALSE)
+               arrow = arrow(), inherit.aes = FALSE) +
+  labs(title = "Visual Solution for 10 Cities and 2 Hubs")
 
 ```
 

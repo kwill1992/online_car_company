@@ -26,7 +26,7 @@ for (ii in 1:50){
 
 
 # Choose number of cities to use
-num_cities <- 3
+num_cities <- 10
 
 #data <- as.data.frame(Network_Modeling)
 # Get top six in each set of TO and FROM
@@ -123,7 +123,7 @@ model <- MIPModel()  %>%
   # FIXED! works with j's
   add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
   # add this to keep Houston
-  add_constraint(y[5] == 1) %>% 
+  #add_constraint(y[5] == 1) %>% 
   add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
   # add linking variables
   # 1500 because the new limit should be 1224
@@ -141,6 +141,18 @@ get_solution(result, y[j])
 #cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i,j]))
 solution
+
+
+solution <- solution %>% 
+  filter(value > 0)
+solution
+### This works!!!
+# no clean it up
+# solution_display <- solution %>% 
+#   filter(value > 0) %>% 
+#   select(variable, i, j, value, FROM_city, TO_city)
+# solution_display
+
 
 library(dplyr)
 # get hub solution

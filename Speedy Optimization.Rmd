@@ -14,14 +14,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Mixed-Integer Linear Programming (MILP) optimization plus sensitivity analysis
 
-## Use of a MILP optimization method and R to choose which locations (hubs), and how many to use as vehicle preparation and distribution centers for an online car sales company  
+## Use of a MILP optimization method and R to choose which locations (hubs), and how many, to use as vehicle preparation and distribution centers for an online car sales company  
 
 #### Premise of this project: Speedy Car Sales (SCS) is a fictional online automobile sales company growing its business of buying and selling used vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
 
 ### MILP Optimization will be conducted using R and Microsoft Excel.  
 
 ### Gather and present population data  
-In this fictional model, SCS will buy and sell USED vehicles throughout the US.  Well, where will the vehicles be coming from and going to? Where the people are! Let's get US population data by county or city.  
+In this fictional model, SCS will buy and sell USED vehicles throughout the U.S.  Well, where will the vehicles be coming from and going to? Where the people are! Let's get US population data by county or city.  
 There are many databases and methods of showing population and/or population density. With much credit here: https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html#county-population-data, we can show population data by county.  
 
 ### Display population by county  
@@ -261,11 +261,13 @@ ggplot(gcounty_pop) +
        subtitle = "Light to Dark == Lower to Higher Population")
 
 ```
-This is a pleasant looking map, but doesn't help us too much for out purposes. This data was separated in to 5 different levels of population by county.  It gives us false impressions of high population areas. For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which gives the appearance of being heavily populated. Also, while one can get the geographic coordinates of the center of a county, that doesn't mean that most of the population is at the center of a county.
+This is a pleasant looking map, but doesn't help us too much for out purposes. This data was separated in to 5 different levels of population by county.  It gives us false impressions of high population areas. For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which gives the appearance of being heavily populated. Also, while one can get the geographic coordinates of the center of a county, that doesn't mean that most of the population is at the center of a county. At geographic location is necessary for getting distances between cities.  
 
 Fortunately, the Internet can link us up with U.S. Census data to get estimated population by city and also by metro area.  
 
 ### Display population data by city  
+  
+After some access to databases and some data manipulation, we can display some city data.  
 
 ```{r dpi = 150, warning= FALSE, message = FALSE}
 # us map of states and populations
@@ -304,18 +306,18 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 
 
-The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston, New York, Washington D.C., Miami, etc... are clearly shown better.
+The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston, New York, Washington D.C., Miami, etc... are clearly shown better. And look at Wyoming. Only two cities show up in this data.  
 
-In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. That is doable for advanced commercial optimization algorithms, but too many for what we want to do and certainly too many for the Solver that comes with MS Excel.  
+In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. Optimization of this many sites might doable for advanced commercial optimization algorithms, but it is far too many for what we want to do and certainly too many for the Solver that comes with MS Excel.  
 
 ### Modeling the Speedy Car Sales business    
 For this fictional sales company, it is in the early growth stage. 
 
 At this stage, we will assume they have just one hub and are looking to expand. The car company started in Houston, TX and that is where their distribution center is. 
 
-For this next phase however, we won't use individual cities. Each new hub costs a lot in new capital. Using cities data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas.If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out Washington D.C. But U.S. Census data is available for metro areas.
+For this next phase however, we won't use individual cities. Each new hub costs a lot in new capital. Using city data might skew our results towards states with very large cities compared to a larger amount of smaller cities pack together in metro areas. If we chose the top 25 or so cities, quite a few California cities might make the cut and might leave out a city such as Washington D.C. But U.S. Census data is available for metro areas.
 
-After some data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six (out of 50) of our data set looks like this below:
+After some more data wrangling, we chose the top 45 areas plus a few extras, like Spokane, WA. The first six (out of 50) of our data set looks like this below:
 ```{r warning= FALSE, message = FALSE}
 #### import data set ####
 library(readr)
@@ -372,11 +374,11 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 Now we have metro area and state. Each metro area has been named by it's prominent city. For example, the New York metro area consists of New York, NY, Newark, NJ, and the surrounding small cities. It is lableled just "New York". This will allow us to calculate distances very easily via Google's API serice which uses Lat/Long or City/State. We are using City/State here.
 
 In our fictional company, they are currently buying and selling 4,000 car per month. Why 4,000? Thanks for asking! The company did $1.2B in sales in 2019. With an average selling price of 
-$30000 per vehicle, that is 40,000 vehicles a year and 3,333 a month.  Let's assume they are growing. That is how we get 4,000 cars a month.
+$30,000 per vehicle, that is 40,000 vehicles a year and 3,333 a month.  Let's assume they are growing. That is how we get 4,000 cars a month.
 
-We are going to start with a small problem are work towards bigger problems. So we will start with the 10 largest metro areas.
+We are going to start with a small problem and work towards bigger problems. We will start with the 10 largest metro areas.
 
-For this optimization, we have 10 cities and 1 hub (Houston, TX). As mentioned earlier, the amount of buying and selling is related to the population. We model sales locations simply by the ratio of populations. If New York metro is 19,000,000 and Los Angeles metro is 9,500,000, NY will have twice the sales of LA.
+For this optimization, we have 10 cities and 1 hub (Houston, TX). As mentioned earlier, the amount of buying and selling is related to the population. We model sales locations simply by the ratio of populations. If New York metro area is 19,000,000 and Los Angeles metro area is 9,500,000, NY will have twice the sales of LA.
 
 From our 50, we filter to the largest 10. Then we get the ratio of each city to the 10-city total and multiple by 4,000.
 Here is our result:
@@ -433,8 +435,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ```
 
 ### Get the cost of shipping  
-For our optimization, well, we need something to optimized. We are going to optimize shipping costs. Specifically, we will minimize costs.  
-We figured that shipping costs might come in two sub-costs. 1) labor to load and unload and 2) cost by mile to ship. Looking through some shipping websites, it is quickly discovered that costs decrease for longer shipping distances. After some trial and error, we came up with the following shipping cost function:  
+For our optimization, well, we need something to be optimized. We are going to optimize shipping costs. Specifically, we will minimize costs.  
+We figured that shipping costs might come in two sub-costs. 1) labor to load and unload and 2) cost by mile to ship. Looking through some shipping websites, it is quickly discovered that costs decrease for longer shipping distances. After some trial and error, we came up with the following heuristic shipping cost function:  
 Shipping Cost (in dollars) = 100 (flat rate to load and unload) + 100 *sqrt(distance)  
 $$
 Cost(Dollars) = 100 + 100\sqrt{miles}
@@ -463,7 +465,7 @@ $$st: X_i \ge S_i~~~\forall i,~i=1~to~10$$
 $$X_i \ge 0~~~\forall i,~i=1~to~10$$
 
 $$X \in Integers$$
-~where C is the cost from each city to Houston, where X is the calculated number of vehicles to move from each city to Houston, and where S is the number of vehicles shipped from each city to Houston.  
+~where $C$ is the cost from each city to Houston, where $X$ is the calculated number of vehicles to move from each city to Houston, and where $S$ is the number of vehicles shipped from each city to Houston.  
 
 ### Calculate shipping costs  
 We have identified the shipping cost function, but we didn't actually calculate shipping costs yet.  
@@ -478,7 +480,7 @@ MS Excel has a limited Solver included with the regular version of Excel. Next i
 
  
 ![Trivial problem - 10 Cities, 1 hub](Images/SCS 1 H.png)
-Excel has solved this trivial problem at a cost of $2,318,286.98. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  
+Excel has solved this trivial problem at a cost of $2,318,286.98. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution for this trivial problem.  
 
 #### Optimization in R  
 Below are the raw results from this problem solved via MILP optimization in R.  
@@ -555,24 +557,24 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 ```
 
-### Optimization between 10 cities and 2 (any 2) hubs
-The optimization problem looks like this:
+### Optimization between 10 cities and 2 hubs
+Here is our first true optimization problem. We have 10 metro areas, the cost to ship between each and Houston or Washington and the number of cars to be shipped. Here we will let the solver chose where each city will ship that give us the least expensive solution. The optimization write-up looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
 $$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
 $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
 $$X \in Integers$$
-~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, and where S is the number of vehicles shipped from each city to Houston.  
+~where $C$ is the cost from each city to each hub, where $X$ is the calculated number of vehicles to move from each city to each hub, and where $S$ is the number of vehicles shipped from each city to Houston and Washington.  
 
 #### Solution in Excel  
 
 ![Trivial problem - 10 Cities, 2 hubs](Images/SCS 2C 2H.png)
-Excel has solved this trivial problem at a cost of $1,634,915.13. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs by looking in the Ship column. You can see some numbers going to Houston and some to Washington.  
+Excel has solved this problem at a cost of $1,634,915.13. You can see cost to ship between the From and To cities as "Unit Cost". Supply/Demand has the number of vehicles that need to be shipped. "Ship" has the solved solution.  You can see now that there is a choice between two hubs by looking in the Ship column. You can see some numbers going to Houston and some to Washington.  
   
 #### Solution in R  
 
 The first box below shows the optimal solution as cost in dollars to ship each month.  
-The second box shows the raw result for each city to hub pair. Right now, there are only 20 options. Row 2 has X, i=2, j=1, value = 614. These means 614 cars shipped from Los Angeles metro area (i=2) to Houston (j=1). This will get overwhelmning with larger problems so this format won't be shown again.  
+The second box shows the raw result for each city to hub pair. Right now, there are only 20 options. Row 2 has X, i=2, j=1, value = 614. This means 614 cars shipped from Los Angeles metro area (i=2) to Houston (j=1). This will get overwhelmning with larger problems so this format won't be shown again.  
 The third box is the shipping solution cleaned up a bit.  
 ```{r warning= FALSE, message = FALSE}
 library(tidyverse)
@@ -706,7 +708,7 @@ In case you were wondering, the distance from Miami to Washington D.C. is 1,058 
 
 ### Optimization between 10 cities and 2 hubs (but must choose one or the other, i.e. only one hub will be chosen and used)
 
-The optimization problem looks like this:
+Next we are going to still use Houston and Washington as our two hub options, but we will make the solver choose ONLY one of the two. The optimization problem looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
 $$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
 $$ \sum_{j=1}^{2}Y_j=1$$
@@ -715,7 +717,7 @@ $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
 $$X \in Integers$$
 $$ Y \in 0~or~1$$
-~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, & where S is the number of vehicles shipped from each city to Houston.  
+~where $C$ is the cost from each city to each hub, where $X$ is the calculated number of vehicles to move from each city to each hub, & where $S$ is the number of vehicles shipped from each city to Houston.  
 These two constraints are added: $\sum_{j=1}^{2}Y_j=1$ and $X_{i,j} \le MAX(S)*Y_j$ and are very important to link the new variable $Y$, which is a binary, to the shipping variable $X$.  
 
 
@@ -723,10 +725,10 @@ These two constraints are added: $\sum_{j=1}^{2}Y_j=1$ and $X_{i,j} \le MAX(S)*Y
 
   
 ![Trivial problem - 10 Cities, 2 hubs](Images/SCS 2 C Choose 1.png)
-Above you can see that all of the cities shipped all of their cars to the Washington, D.C. hub. They ALL had to choose to the same hub. If they had chosen Houston, that would have meant that it would have cost more to ship there than DC. But they chose DC, which means that this solution must have been cheaper than Houston. And it was: $2,090,971 for shipping all to Washington, vs.  
+Above you can see that all of the cities shipped all of their cars to the Washington, D.C. hub. They ALL had to choose to the same hub. If they had chosen Houston, that would have meant that it would have cost more to ship there than DC. But they chose DC, which means that this solution must have been cheaper than Houston. And it was: $2,090,971 for shipping all to Washington, vs. 
 $2,318,287 for shipping all to Houston.  
 
-#### R solution  
+#### Solution in R  
 The first box has the minimum cost solution.  
 The second box shows the Y variable solution, i.e. which hub was chosen.  
 The third box shows the X variable solution and number of cars shipped between which cities and which hubs. In this case, as we forced the solver to choose only one hub, Washington was chosen.  
@@ -880,7 +882,7 @@ $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~10$$
 
 $$X \in Integers$$
 $$ Y \in 0~or~1$$
-~where C is the cost from each city to each hub, where X is the calculated number of vehicles to move from each city to each hub, where Y is which hubs were chosen in the solution, and where S is the number of vehicles shipped from each city to Houston.  
+~where $C$ is the cost from each city to each hub, where $X$ is the calculated number of vehicles to move from each city to each hub, where $Y$ is which hubs were chosen in the solution, and where $S$ is the number of vehicles shipped from each city to Houston.  
 
 
 #### Solution in Excel  
@@ -888,8 +890,9 @@ $$ Y \in 0~or~1$$
 As you can see, Excel can't do this. We have quickly reached the limit of what the internal Solver than came with Excel can do. There are commercial add-ins to Excel that can be purchased that will allow bigger optimization problems. **But we can keep going with R.**
 
 
-### 10 Cities, Choose 3 Hubs
-#### R Solution  
+### 10 Cities, Choose 3 Hubs  
+Here we will keep using the same 10 large metro areas and choose the number of hubs we want to use. The number of hubs can be from 1 to 10. We randomly chose 3.  
+#### Solution in R  
 
 
 ```{r warning= FALSE, message = FALSE}
@@ -1044,7 +1047,7 @@ to.column <- as.vector(get_supply$to)
 solution_hub <- solution_hub %>% 
   add_column(Hub = 0)
 solution_hub$Hub <- to.column
-#solution_hub
+solution_hub
 
 # Adds after the second column
 solution <- solution %>%
@@ -1090,7 +1093,7 @@ for ( k in 1:length(city_data$lon.to)){
 #   filter(value > 0)
 solution <- solution %>% 
   filter(value > 0)
-solution
+#solution
 ### This works!!!
 # no clean it up
 solution_display <- solution %>% 
@@ -1700,8 +1703,20 @@ The amount of Rent & Labor Costs to operate each hub clearly matter in this mode
   
 As shipping costs appear to matter less than rent and labor costs, it might be beneficial to next look at finding locations where the rent and labor rates are lowest. Would an area in middle Pennsylvania be a better location due to reduced hub expenses than placing a hub in New York, Philadelphia, Baltimore, or Washington D.C. even though there might be a slight increase in shipping costs. Probably so.  
 
-#### Follow-on ideas:
-1) 
+#### Notes:  
+- Shipping calculations used were just one model quickly developed using a little bit of time on a website and adding heuristics. The modifier for H, M, & L was just a rule of thumb. Follow-on modeling would be necessary to get more accurate shipping calculations.  
+- Rent/labor calculations/modeling were also developed using heuristics. The modifier for H, M, & L was also a rule of thumb based on judgment, not detailed research and analysis. Detailed city-by-city analysis might be necessary to get an accurate model for rent/labor.  
+- Shipping costs assumed this effort was contracted out.  Other modeling could be done to compare contracting vs. in-house shipping ability. Or if some mix between contracting/in-house would be the best option.  
 
+
+#### Follow-on ideas:
+1) Add in long haul freight that might be less expensive, such as shipping part way via rail. This might only be available in certain very large metro areas.
+2) Webscrape, or develop another model, to get more accurate shipping costs.  
+3) Get more accurate rent and labor costs.  
+4) Include up from capital outlays in the costs for a certain period of time, such as 5 years.  
+5) Include the rent/labor of a metro area in the optimization function. This is much more complex but could perhaps result in different outcomes. For example, if Philadelphia is much less expensive than New York, Philadelphia might be a hub chosen over New York.  
+6) Link up with a much more powerful computer to do bigger and bigger datasets to get more and more fidelity. Online cloud computing would be the next step. 
+7) Include growth projections in modeling.  
+8) Include sensitivity analysis of the growth projections.  
 
 

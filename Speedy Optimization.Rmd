@@ -552,7 +552,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
-  labs(title = "Visual of Solution Showing Arrows Indicating Shipping")
+  labs(title = "Visual of Solution Showing Arrows Indicating Shipping") +
+  coord_map("bonne", parameters=45)
 
 
 ```
@@ -894,6 +895,8 @@ As you can see, Excel can't do this. We have quickly reached the limit of what t
 Here we will keep using the same 10 large metro areas and choose the number of hubs we want to use. The number of hubs can be from 1 to 10. We randomly chose 3.  
 #### Solution in R  
 
+The first box below has the "hubs" solution: New York, Los Angeles, and Dallas were chosen. The second box shows the number of cars shipped.  
+
 
 ```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
@@ -1030,7 +1033,7 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
-#result
+result
 #get_solution(result, x[i,j])
 #get_solution(result, y[j])
 
@@ -1144,21 +1147,19 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 ```
 
-  
-equation
 
-R solution
-# now we are cooking
-# now 50 cities and X number of hubs
+## 50 Cities, Chose 2 Hubs (1 Must Be Houston)  
+We are now using all of the 50 large metros areas we found earlier. We will model our growing car sales company. If their first hub was in Houston (and they don't want to move it at this time), where should the next hub be located.  
+#### Solution in R  
 
-
-## Let's 50 C, best 2 hubs, with 1 Houston
 
 
 ```{r warning= FALSE, message = FALSE}
 # Choose more than two, any two
 
 #### import data set ####
+library(scales)
+library(tidyverse)
 library(readr)
 library(tidyr)
 library(dplyr)
@@ -1289,8 +1290,8 @@ model <- MIPModel()  %>%
 
 
 #result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-#result
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
+result
 #get_solution(result, x[i,j])
 #get_solution(result, y[j])
 
@@ -1307,7 +1308,9 @@ to.column <- as.vector(get_supply$to)
 solution_hub <- solution_hub %>% 
   add_column(Hub = 0)
 solution_hub$Hub <- to.column
-#solution_hub
+solution_hub <- solution_hub %>% 
+  filter(value > 0)
+solution_hub
 
 # Adds after the second column
 solution <- solution %>%
@@ -1352,7 +1355,10 @@ for ( k in 1:length(city_data$lon.to)){
 solution <- solution %>% 
   filter(value > 0)
 
-
+solution_display <- solution %>%
+  filter(value > 0) %>%
+  select(variable, i, j, value, FROM_city, TO_city)
+solution_display
 
 #### now map it ####
 library(tidyverse)
@@ -1381,7 +1387,18 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_text(data = city_data, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                     yend = lat.to), color = "blue", size = 0.3,
-               arrow = arrow(), inherit.aes = FALSE)
+               arrow = arrow(), inherit.aes = FALSE) +
+  guides(alpha = FALSE) +
+  guides(color = FALSE) +
+  scale_size("Population", labels = comma) +
+  #scale_color_gradient2(midpoint=6500000,
+  #                    low="blue", high="red" ) +
+
+  #coord_map("bonne", parameters=45) +
+  ggthemes::theme_map() +
+
+  labs(title = "Visual Solution for 50 Cities and 3 Hubs")+
+  coord_map("bonne", parameters=45)
 
 ```
 
@@ -1389,7 +1406,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 ### Let's 50 C, best 3 hubs, any hubs  
 
-#### R Solution  
+#### Solution in R  
 
 
 ```{r warning= FALSE, message = FALSE}
@@ -1527,7 +1544,7 @@ model <- MIPModel()  %>%
 
 #result <- ROI_solve(model, solver = "glpk")
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
-#result
+result
 #get_solution(result, x[i,j])
 #get_solution(result, y[j])
 
@@ -1672,13 +1689,18 @@ A quick search for leasing auto mechanical space in Maryland yielded rates betwe
 High: $3 per sqft
 Med: $1.75 per sqft
 Low: $0.75 per sqft  
+For each of these spaces, they were rounded up to the nearest whole number. So, if a hub should have 1.23 mechanics' bays, the result will be that it needs 2 mechanic bays. Same for the other positions.  
 
+A similar method was used to for the laborers. And a rate adjustment was used which is another heuristic. For the rate $R$ used, level adjustments are: High - $1.25*R$, Medium - $1*R$, and Low - $0.5*R$.  
 
-what if we add capital cost to build a new hub and it matches city population, we, of course , could do more in depth analysis for real estate and include that
+## Calculations  
+450 calculations were planned. For a dataset with 50 metro areas, an optimization would be done for each solution of the number of hubs from 1 to 50. Then, for each solution, the 3 different shipping costs. And, for those, the 3 different Rent/Labor rates.  
+That's 50 * 3 * 3 = 450  
 
-
-$\frac{a}{b}$
-
+## Houston, we have a problem...  
+As it turns out, the 2015 Macbook used wasn't fully up to the task. Significant more time was needed to solve problems with 50 metro areas and up to 50 hubs. 1 hub solved in about 1 minute. 2 hubs needed about 10 minutes. 3 hubs - 35 minutes. 4 hubs - well over an hour. For 5 hubs, the solver appeared to be about 40% complete at 3 hours and the calculation was stopped. It just wasn't reasonable to keep going.  
+Fortunately, 25 metros and up to 25 hubs was significantly quicker. The total time for these smaller optimizations was just over two hours.  
+A plot of the outcomes is below.  
 
 #### Plot output
 

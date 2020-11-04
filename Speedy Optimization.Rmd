@@ -865,7 +865,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
 
-  labs(title = "Visual Solution for 10 Cities and a Choice Between 2 Hubs: Houston and Washington")
+  labs(title = "Visual Solution for 10 Cities and a Choice Between 2 Hubs: Houston and Washington") +
+  coord_map("bonne", parameters=45)
 
 
 ```
@@ -1718,12 +1719,16 @@ ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
 ```
   
 #### Analysis  
-The shape of the "Rent & Labor Cost" curves for each H, M, & L level are all very similar. In other words, for the three different Shipping Costs for Low Rent * Labor Cost, the curvew are very similar. This indicates Shipping Costs (at least how estimated in this model) have less impact on the optimal number of hubs than Rent & Labor Costs do. Excluding Rent & Labor Costs all together (not shown here) shows that Costs keep decreasing as more hubs are added. But, of course, hubs cost money to operate.  
+The shape of the "Rent & Labor Cost" curves for each H, M, & L level are all very similar. In other words, for the three different Shipping Costs for Low Rent/Labor Cost, the curves are very similar. This indicates Shipping Costs (at least how estimated in this model) have much less impact on the optimal number of hubs than Rent & Labor Costs do. Excluding Rent & Labor Costs all together (not shown here) shows that Costs keep decreasing as more hubs are added. But, of course, hubs cost money to operate.  
   
 
-The amount of Rent & Labor Costs to operate each hub clearly matter in this model. As modeled, one can clearly a minimum cost near 9 hubs for H and M costs (as modeled). This is because as more and more hubs are added and fewer and fewer cars go to each hub, there is the expectation that some of the mechanics and vehicle preparers won't be fully employed 8 hours a day. But, the company still needs to have them.  
+The amount of Rent & Labor Costs to operate each hub clearly matter in this model. As modeled, one can clearly observe a minimum cost near 9 hubs for H and M costs (as modeled). This is because as more and more hubs are added and fewer and fewer cars go to each hub, there is the expectation that some of the mechanics and vehicle preparers won't be fully employed 8 hours a day. But, the company still needs to have them.  
   
 As shipping costs appear to matter less than rent and labor costs, it might be beneficial to next look at finding locations where the rent and labor rates are lowest. Would an area in middle Pennsylvania be a better location due to reduced hub expenses than placing a hub in New York, Philadelphia, Baltimore, or Washington D.C. even though there might be a slight increase in shipping costs. Probably so.  
+
+#### Main Observation  
+Cost of the operation of the hubs is more of a factor in changing costs than shipping. [As modeled.]  
+
 
 #### Notes:  
 - Shipping calculations used were just one model quickly developed using a little bit of time on a website and adding heuristics. The modifier for H, M, & L was just a rule of thumb. Follow-on modeling would be necessary to get more accurate shipping calculations.  
@@ -1735,10 +1740,10 @@ As shipping costs appear to matter less than rent and labor costs, it might be b
 1) Add in long haul freight that might be less expensive, such as shipping part way via rail. This might only be available in certain very large metro areas.
 2) Webscrape, or develop another model, to get more accurate shipping costs.  
 3) Get more accurate rent and labor costs.  
-4) Include up from capital outlays in the costs for a certain period of time, such as 5 years.  
-5) Include the rent/labor of a metro area in the optimization function. This is much more complex but could perhaps result in different outcomes. For example, if Philadelphia is much less expensive than New York, Philadelphia might be a hub chosen over New York.  
+4) Include upfront capital outlays in the costs for a certain period of time, such as 5 years.  
+5) Include a much more accurate estimate of the rent/labor of a metro area in the optimization function. This is much more complex but could perhaps result in different outcomes. For example, if Philadelphia is much less expensive than New York, Philadelphia might be a hub chosen over New York.  
 6) Link up with a much more powerful computer to do bigger and bigger datasets to get more and more fidelity. Online cloud computing would be the next step. 
-7) Include growth projections in modeling.  
+7) Include sales growth projections in the modeling.  
 8) Include sensitivity analysis of the growth projections.  
 
 

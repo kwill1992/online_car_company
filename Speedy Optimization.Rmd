@@ -1149,7 +1149,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ```
 
 
-## 50 Cities, Chose 2 Hubs (1 Must Be Houston)  
+### 50 Cities, Chose 2 Hubs (1 Must Be Houston)  
 We are now using all of the 50 large metros areas we found earlier. We will model our growing car sales company. If their first hub was in Houston (and they don't want to move it at this time), where should the next hub be located.  
 #### Solution in R  
 
@@ -1405,7 +1405,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 
 
-### Let's 50 C, best 3 hubs, any hubs  
+### 50 Cities, Chose Any 3 Hubs  
 
 #### Solution in R  
 
@@ -1698,7 +1698,7 @@ A similar method was used to for the laborers. And a rate adjustment was used wh
 450 calculations were planned. For a dataset with 50 metro areas, an optimization would be done for each solution of the number of hubs from 1 to 50. Then, for each solution, the 3 different shipping costs. And, for those, the 3 different Rent/Labor rates.  
 That's 50 * 3 * 3 = 450  
 
-## Houston, we have a problem...  
+### Houston, we have a problem...  
 As it turns out, the 2015 Macbook used wasn't fully up to the task. Significant more time was needed to solve problems with 50 metro areas and up to 50 hubs. 1 hub solved in about 1 minute. 2 hubs needed about 10 minutes. 3 hubs - 35 minutes. 4 hubs - well over an hour. For 5 hubs, the solver appeared to be about 40% complete at 3 hours and the calculation was stopped. It just wasn't reasonable to keep going.  
 Fortunately, 25 metros and up to 25 hubs was significantly quicker. The total time for these smaller optimizations was just over two hours.  
 A plot of the outcomes is below.  

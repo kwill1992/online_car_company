@@ -1130,7 +1130,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = city_data, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = city_data, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                     yend = lat.to), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE) +
@@ -1385,7 +1385,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   geom_point(data = city_data, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
-  geom_text(data = city_data, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
   geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
                                     yend = lat.to), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE) +
@@ -1398,7 +1398,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) +
   ggthemes::theme_map() +
 
-  labs(title = "Visual Solution for 50 Cities and 3 Hubs")+
+  labs(title = "Visual Solution for 50 Cities and 2 Hubs (1 == Houston)")+
   coord_map("bonne", parameters=45)
 
 ```

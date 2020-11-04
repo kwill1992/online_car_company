@@ -1,7 +1,7 @@
 ---
 title: "Optimization of Speedy Car Sales, Inc."
 author: "Kevin Williams"
-date: "11/2/2020"
+date: "11/3/2020"
 output:
   html_document:
     code_folding: hide
@@ -298,7 +298,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   ggthemes::theme_map() +
   theme(legend.position="bottom") +
   labs(title = "U.S. Population By City", 
-       subtitle = "For All U.S. Cities With Greater Than 40,000 People")
+       subtitle = "For All U.S. Cities With Greater Than 40,000 People") +
+  coord_map("bonne", parameters=45)
 ```
 
 
@@ -326,7 +327,7 @@ head(cities_raw)
 
 ### Display top 50 metro areas
 
-```{r warning= FALSE, message = FALSE}
+```{r warning= FALSE, message = FALSE, fig.align = "center"}
 #### now map it ####
 library(tidyverse)
 library(ggplot2)
@@ -362,7 +363,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   ggthemes::theme_map() +
   theme(legend.position="bottom") +
   labs(title = "U.S. Population By Metro Area", 
-       subtitle = "Using U.S. Definition of Metro Area")
+       subtitle = "Using U.S. Definition of Metro Area")+
+  coord_map("bonne", parameters=45)
 
 ```
 
@@ -424,7 +426,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   ggthemes::theme_map() +
 
   theme(legend.position="bottom") +
-  labs(title = "10 Large Metro Areas in the U.S.")
+  labs(title = "10 Large Metro Areas in the U.S.")+
+  coord_map("bonne", parameters=45)
 
 
 ```
@@ -693,7 +696,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
 
-  labs(title = "Visual Solution for 10 Cities and 2 Hubs")
+  labs(title = "Visual Solution for 10 Cities and 2 Hubs")+
+  coord_map("bonne", parameters=45)
 
 ```
   
@@ -1132,7 +1136,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) + 
   ggthemes::theme_map() +
 
-  labs(title = "Visual Solution for 10 Cities and 3 Hubs")
+  labs(title = "Visual Solution for 10 Cities and 3 Hubs")+
+  coord_map("bonne", parameters=45)
 
 ```
 
@@ -1627,7 +1632,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   #coord_map("bonne", parameters=45) +
   ggthemes::theme_map() +
 
-  labs(title = "Visual Solution for 50 Cities and 3 Hubs")
+  labs(title = "Visual Solution for 50 Cities and 3 Hubs")+
+  coord_map("bonne", parameters=45)
 
 ```
 
@@ -1673,38 +1679,23 @@ $\frac{a}{b}$
 
 #### Plot output
 
-```{r}
+```{r warning= FALSE, message = FALSE}
 final2 <- read_csv("25_city_results_to_plot.csv")
 library(scales)
 ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
   geom_point(data = final2, aes(x = num.hubs, y = total.cost, shape=miles.func, color = rent.func)) +
-  labs(title = "Total Cost (per month) of Shipping and Preparing Cars for Speedy Car Sales, Inc.", x = "Number of Hubs", y = "Total Cost ($)", shape = "Shipping Cost", color = "Rent & Labor Cost") +
+  labs(title = "Total Cost (per month)",
+      subtitle = "Shipping and Preparing Cars for Speedy Car Sales, Inc.", 
+       x = "Number of Hubs", y = "Total Cost ($)", shape = "Shipping Cost", 
+      color = "Rent & Labor Cost") +
   theme(legend.position="bottom") +
   scale_y_continuous(label=dollar_format())
 ```
-
-
-Step 2: Plot data  
-
-
-Step 3:  
-
-Step 4:  
+  
+#### Analysis  
+The shape of the "Rent & Labor Cost" curves for each H, M, & L level are all very similar. In other words, for the three different Shipping Costs for Low Rent * Labor Cost, the curvew are very similar. This indicates Shipping Costs (at least how estimated in this model) have less impact on the optimal number of hubs than Rent & Labor Costs do. Excluding Rent & Labor Costs all together (not shown here) shows that Costs keep decreasing as more hubs are added. But, of course, hubs cost money to operate.  
+The amount of Rent & Labor Costs to operate each hub clearly matter in this model. As modeled, one can clearly a minimum cost near 9 hubs for H and M costs (as modeled). This is because as more and more hubs are added and fewer and fewer cars go to each hub, there is the expectation that some of the mechanics and vehicle preparers won't be fully employed 8 hours a day. But, the company still needs to have them.  
+As shipping costs appear to matter less than rent and labor costs, it might be beneficial to next look at finding locations where the rent and labor rates are lowest. Would an area in middle Pennsylvania be a better location due to reduced hub expenses than placing a hub in New York, Philadelphia, Baltimore, or Washington D.C. even though there might be a slight increase in shipping costs. Probably so.  
 
 
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

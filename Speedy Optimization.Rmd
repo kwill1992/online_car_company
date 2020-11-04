@@ -327,7 +327,7 @@ head(cities_raw)
 
 ### Display top 50 metro areas
 
-```{r warning= FALSE, message = FALSE, fig.align = "center"}
+```{r warning= FALSE, message = FALSE}
 #### now map it ####
 library(tidyverse)
 library(ggplot2)
@@ -363,8 +363,8 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   ggthemes::theme_map() +
   theme(legend.position="bottom") +
   labs(title = "U.S. Population By Metro Area", 
-       subtitle = "Using U.S. Definition of Metro Area")+
-  coord_map("bonne", parameters=45)
+       subtitle = "Using U.S. Census Definition of Metro Area")+
+  coord_map("bonne", parameters=45) 
 
 ```
 
@@ -1694,8 +1694,14 @@ ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
   
 #### Analysis  
 The shape of the "Rent & Labor Cost" curves for each H, M, & L level are all very similar. In other words, for the three different Shipping Costs for Low Rent * Labor Cost, the curvew are very similar. This indicates Shipping Costs (at least how estimated in this model) have less impact on the optimal number of hubs than Rent & Labor Costs do. Excluding Rent & Labor Costs all together (not shown here) shows that Costs keep decreasing as more hubs are added. But, of course, hubs cost money to operate.  
+  
+
 The amount of Rent & Labor Costs to operate each hub clearly matter in this model. As modeled, one can clearly a minimum cost near 9 hubs for H and M costs (as modeled). This is because as more and more hubs are added and fewer and fewer cars go to each hub, there is the expectation that some of the mechanics and vehicle preparers won't be fully employed 8 hours a day. But, the company still needs to have them.  
+  
 As shipping costs appear to matter less than rent and labor costs, it might be beneficial to next look at finding locations where the rent and labor rates are lowest. Would an area in middle Pennsylvania be a better location due to reduced hub expenses than placing a hub in New York, Philadelphia, Baltimore, or Washington D.C. even though there might be a slight increase in shipping costs. Probably so.  
+
+#### Follow-on ideas:
+1) 
 
 
 

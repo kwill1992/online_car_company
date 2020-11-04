@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Premise of this project: Speedy Car Sales (SCS) is a fictional online automobile sales company growing its business of buying and selling used vehicles throughout the contiguous United States. Their operating model is to buy vehicles throughout the US and ship them to one or more preparation centers, prepare the vehicles, and ship them directly to the customer. SCS believes it can make up for the expense of two-way shipping cost by having fewer distribution centers which are models of efficiency. At the distribution centers, the vehicles will be inspected, cleaned, repaired, if necessary, and photographed for online sales. The vehicles will then be shipped to a buyer.
 
-### MILP Optimization will be conducted using R and Microsoft Excel.  
+### MILP Optimization will be conducted using R and Microsoft Excel  
 
 ### Gather and present population data  
 In this fictional model, SCS will buy and sell USED vehicles throughout the U.S.  Well, where will the vehicles be coming from and going to? Where the people are! Let's get US population data by county or city.  
@@ -884,11 +884,13 @@ $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~10$$
 
 $$X \in Integers$$
 $$ Y \in 0~or~1$$
-~where $C$ is the cost from each city to each hub, where $X$ is the calculated number of vehicles to move from each city to each hub, where $Y$ is which hubs were chosen in the solution, and where $S$ is the number of vehicles shipped from each city to Houston.  
+~where $C$ is the cost from each city to each hub, where $X$ is the calculated number of vehicles to move from each city to each hub, where $Y$ is which hubs were chosen in the solution, and where $S$ is the number of vehicles shipped from each city to a hub.  
 
 
 #### Solution in Excel  
 ![Trivial problem - 10 Cities, 2 hubs](Images/SCS 10 C cant do.png)
+  
+  
 As you can see, Excel can't do this. We have quickly reached the limit of what the internal Solver than came with Excel can do. There are commercial add-ins to Excel that can be purchased that will allow bigger optimization problems. **But we can keep going with R.**
 
 
@@ -1745,5 +1747,6 @@ Cost of the operation of the hubs is more of a factor in changing costs than shi
 6) Link up with a much more powerful computer to do bigger and bigger datasets to get more and more fidelity. Online cloud computing would be the next step. 
 7) Include sales growth projections in the modeling.  
 8) Include sensitivity analysis of the growth projections.  
+9) What if the number of cars that can be serviced at certain hubs is limited? Put that option in the modeling.  
 
 

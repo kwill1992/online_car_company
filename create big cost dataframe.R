@@ -324,24 +324,120 @@ final2 <- final[ -c(3) ]
 write_csv(final2,"25_city_results.csv")
 
 
+
+
+
+# get_supply <- as_tibble(cities_raw)
+# # Add a number for each city 1 to 50
+# city_data <- city_data %>% 
+#   add_column(num.from = 0, .after = 4) %>% 
+#   add_column(num.to = 0, .after = 6)
 ### Fix H, M, L for cost column
 final2 <- read_csv("25_city_results.csv")
+final2 <- as_tibble(final2)
+final2 <- final2 %>% 
+  add_column(total.rent = 0, .after = 80) %>% 
+  add_column(total.labor = 0, .after = 81)
 # for (fix2 in 151:225){
 #   final2$miles.func[fix2] <- "L"
 # }
 # write_csv(final2,"25_city_results.csv")
-final2[1,2]
-row,column
-for (iii in 1:25){
-  final2$rent.func[iii] <- "H"
-  counter <- 29
+#final2[1,2]
+#row,column
+#numcars <- 4000/20
+row <- 1
+for (iii in 1:75){
+  final2$rent.func[row] <- "H"
+  #counter <- 29
   for(jjj in 54:78){
-    rent <- 20*30*ceiling()
-    counter <- counter + 1
+    #officespace <- 0
+    numcars <- final2[row,jjj-25]/20
+    officespace <- if(numcars > 0) 1 else 0
+    num.foreman <- if(numcars > 0) 2 else 0
+    #if (numcars >0) then (officespace == 1)
+    rent <- 3*(20*30*ceiling(numcars/2) + 15*30*ceiling(numcars/2) + 20*30*2*ceiling(numcars/10) + 20*30*ceiling(numcars/4) + officespace*(30*30))
+    labor <- 1.25*(75*8*20*ceiling(numcars/2) + 35*8*20*ceiling(numcars/2) + 75*8*20*2*ceiling(numcars/10) + 45*8*20*ceiling(numcars/4) + num.foreman*90*8*20)
+    final2[row,jjj] <- rent + labor
+    final2[row,81] <- rowSums(final2[row, c(54:78)])
+    final2[row,79] <- final2[row,80] + final2[row,81]
+    #counter <- counter + 1
   }
+  row <- row + 1
+  final2$rent.func[row] <- "M"
+  #counter <- 29
+  for(jjj in 54:78){
+    #officespace <- 0
+    numcars <- final2[row,jjj-25]/20
+    officespace <- if(numcars > 0) 1 else 0
+    num.foreman <- if(numcars > 0) 2 else 0
+    #if (numcars >0) then (officespace == 1)
+    rent <- 1.75*(20*30*ceiling(numcars/2) + 15*30*ceiling(numcars/2) + 20*30*2*ceiling(numcars/10) + 20*30*ceiling(numcars/4) + officespace*(30*30))
+    labor <- 1*(75*8*20*ceiling(numcars/2) + 35*8*20*ceiling(numcars/2) + 75*8*20*2*ceiling(numcars/10) + 45*8*20*ceiling(numcars/4) + num.foreman*90*8*20)
+    final2[row,jjj] <- rent + labor
+    final2[row,81] <- rowSums(final2[row, c(54:78)])
+    final2[row,79] <- final2[row,80] + final2[row,81]
+    #counter <- counter + 1
+  }
+  row <- row + 1
+  final2$rent.func[row] <- "L"
+  #counter <- 29
+  for(jjj in 54:78){
+    #officespace <- 0
+    numcars <- final2[row,jjj-25]/20
+    officespace <- if(numcars > 0) 1 else 0
+    num.foreman <- if(numcars > 0) 2 else 0
+    #if (numcars >0) then (officespace == 1)
+    rent <- .75*(20*30*ceiling(numcars/2) + 15*30*ceiling(numcars/2) + 20*30*2*ceiling(numcars/10) + 20*30*ceiling(numcars/4) + officespace*(30*30))
+    labor <- .75*(75*8*20*ceiling(numcars/2) + 35*8*20*ceiling(numcars/2) + 75*8*20*2*ceiling(numcars/10) + 45*8*20*ceiling(numcars/4) + num.foreman*90*8*20)
+    final2[row,jjj] <- rent + labor
+    final2[row,81] <- rowSums(final2[row, c(54:78)])
+    final2[row,79] <- final2[row,80] + final2[row,81]
+    #counter <- counter + 1
+  }
+  row <- row +1
 }
+library(scales)
+ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
+  geom_point(data = final2, aes(x = num.hubs, y = total.cost, shape=miles.func, color = rent.func)) +
+  labs(title = "Total Cost (per month) of Shipping and Preparing Cars for Speedy Car Sales, Inc.", x = "Number of Hubs", y = "Total Cost ($)", shape = "Shipping Cost", color = "Rent & Labor Cost") +
+  theme(legend.position="bottom") +
+  scale_y_continuous(label=dollar_format())
+                                       group = group)) +
 
-ceiling(.1)
+  
+  
+  div=1000
+  
+  ggplot(melt(df, id.var="Date"), 
+         aes(x = Date, y = value/div, color=variable, linetype=variable))+
+    geom_line() +
+    xlim(c(left, right)) + 
+    labs(x="", y="Cost (Thousands)") +
+    scale_y_continuous(label=dollar_format(),
+                       limits=c(min(df$Cost[df$Date > left]), 
+                                max(df$Cost[df$Date > left]))/div)
+ggplot(df, aes(x=wt, y=mpg, group=cyl)) +
+  geom_point(aes(shape=cyl))
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = final2, aes( x = num.hubs, y = total.cost))
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = city_data, aes(x = lon.from, y = lat.from, label = from), inherit.aes = FALSE) +
+  geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
+                                    yend = lat.to), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE)
+
+p <- ggplot(data = mtcars, aes(x = mpg, y = wt))+
+  geom_point(aes(color = cyl, size = qsec, shape = gear))
+p
+
+
+#$$B = 20*30*\frac{N_{cars}}{2} + 15*30*\frac{N_{cars}}{2} + 20*30*2*\frac{N_{cars}}{10} + 20*30*\frac{N_{cars}}{4} + 30*30$$
+#  ~ where $B$ = sqft of building needed, $N_{cars}$ = number of cars per month/20, [rounded up to next whole number for each work case].  
+#A quick search for leasing auto mechanical space in Maryland yielded rates between 75cents/sqft to $3/sqft. We'll used three levels:
+High: $3 per sqft
+Med: $1.75 per sqft
+Low: $0.75 per sqft  
 
 #### add rent function
 final

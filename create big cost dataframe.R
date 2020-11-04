@@ -387,8 +387,8 @@ for (iii in 1:75){
     officespace <- if(numcars > 0) 1 else 0
     num.foreman <- if(numcars > 0) 2 else 0
     #if (numcars >0) then (officespace == 1)
-    rent <- .75*(20*30*ceiling(numcars/2) + 15*30*ceiling(numcars/2) + 20*30*2*ceiling(numcars/10) + 20*30*ceiling(numcars/4) + officespace*(30*30))
-    labor <- .75*(75*8*20*ceiling(numcars/2) + 35*8*20*ceiling(numcars/2) + 75*8*20*2*ceiling(numcars/10) + 45*8*20*ceiling(numcars/4) + num.foreman*90*8*20)
+    rent <- .5*(20*30*ceiling(numcars/2) + 15*30*ceiling(numcars/2) + 20*30*2*ceiling(numcars/10) + 20*30*ceiling(numcars/4) + officespace*(30*30))
+    labor <- .5*(75*8*20*ceiling(numcars/2) + 35*8*20*ceiling(numcars/2) + 75*8*20*2*ceiling(numcars/10) + 45*8*20*ceiling(numcars/4) + num.foreman*90*8*20)
     final2[row,jjj] <- rent + labor
     final2[row,81] <- rowSums(final2[row, c(54:78)])
     final2[row,79] <- final2[row,80] + final2[row,81]
@@ -396,12 +396,17 @@ for (iii in 1:75){
   }
   row <- row +1
 }
+
+
 library(scales)
 ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
   geom_point(data = final2, aes(x = num.hubs, y = total.cost, shape=miles.func, color = rent.func)) +
   labs(title = "Total Cost (per month) of Shipping and Preparing Cars for Speedy Car Sales, Inc.", x = "Number of Hubs", y = "Total Cost ($)", shape = "Shipping Cost", color = "Rent & Labor Cost") +
   theme(legend.position="bottom") +
   scale_y_continuous(label=dollar_format())
+
+write_csv(final2,"25_city_results_to_plot.csv")
+
                                        group = group)) +
 
   

@@ -1671,6 +1671,18 @@ what if we add capital cost to build a new hub and it matches city population, w
 $\frac{a}{b}$
 
 
+#### Plot output
+
+```{r}
+final2 <- read_csv("25_city_results_to_plot.csv")
+library(scales)
+ggplot(data = final2, mapping = aes(x = num.hubs, y = total.cost)) +
+  geom_point(data = final2, aes(x = num.hubs, y = total.cost, shape=miles.func, color = rent.func)) +
+  labs(title = "Total Cost (per month) of Shipping and Preparing Cars for Speedy Car Sales, Inc.", x = "Number of Hubs", y = "Total Cost ($)", shape = "Shipping Cost", color = "Rent & Labor Cost") +
+  theme(legend.position="bottom") +
+  scale_y_continuous(label=dollar_format())
+```
+
 
 Step 2: Plot data  
 

@@ -445,37 +445,30 @@ The third box shows the number of cars shipped between each city.
 
 ```{r warning= FALSE, message = FALSE}
 library(tidyverse)
-library(ompr)
-library(magrittr)
+#library(ompr)
+#library(magrittr)
 library(ROI)
 library(ROI.plugin.glpk)
 library(ompr)
 library(ompr.roi)
-# Shipping Cost
+# Manual input of Shipping Cost
 cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42)
 # Supply to move from each cities
 supply <- c(893,614,440,352,328,292,287,284,280,230)
-
+# Create optimization model
+# The ompr package allows use of normal optimization set notation.
 model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
+  # Number of cars shiped to Xi
   add_variable(x[i], i = 1:10, type = "integer", lb = 0) %>% 
   # minimize shipping cost
   set_objective(sum_expr(cost[i] * x[i], i = 1:10), "min") %>% 
   # must use supply from each city
   add_constraint(x[i] >= supply[i], i = 1:10) #%>% 
-  # use only one Y
-  #add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
-  # add linking variables
-  
-#result <- ROI_solve(model, solver = "glpk")
-# result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-# result
-# get_solution(result, x[i])
-
-
+# Solve the model and give raw output
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
+# Display just optimal answer
 result
-#get_solution(result, x[i])
+# Show how many cars were shipped from each city to each hub.  Right now, just Houston.
 cities_10 <- read_csv("distances_top_10.csv")
 solution <- as_tibble(get_solution(result, x[i]))
 solution$FROM_city <- c(cities_10$from[1:10])

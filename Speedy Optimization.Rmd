@@ -1,7 +1,7 @@
 ---
 title: "Optimization of Speedy Car Sales, Inc."
 author: "Kevin Williams"
-date: "11/3/2020"
+date: "11/6/2020"
 output:
   html_document:
     code_folding: hide
@@ -199,9 +199,9 @@ ggplot(gcounty_pop) +
   labs(title = "U.S. Population by County", 
        subtitle = "Light to Dark == Lower to Higher Population")
 ```
-This is a pleasant looking map, but doesn't help us too much for out purposes. This data was separated in to 5 different levels of population by county.  It gives us false impressions of high population areas. For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which gives the appearance of being heavily populated. Also, while one can get the geographic coordinates of the center of a county, that doesn't mean that most of the population is at the center of a county. At geographic location is necessary for getting distances between cities.  
+This is a pleasant looking map, but doesn't help us too much for our purposes. This data was separated in to 5 different levels of population by county.  It gives us false impressions of high population areas. For instance, look at Arizona and Texas.  Because the counties are so big in Arizona, it looks like the entire state is deep red and has a lot higher population than it actually does whereas Texas looks moderately populated.  The same with Wyoming, which gives the appearance of being heavily populated. Also, while one can get the geographic coordinates of the center of a county, that doesn't mean that most of the population is at the center of a county. And geographic location is necessary for getting distances between cities.  
 
-Fortunately, the Internet can link us up with U.S. Census data to get estimated population by city and also by metro area.  
+Fortunately, the World Wide Web can link us up with U.S. Census data to get estimated population by city and also by metro area.  
 
 ### Display population data by city  
   
@@ -255,7 +255,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat, group = group)) +
 
 The plot above gives us a better representation of population centers. Arizona now shows only a few population centers around Phoenix and Tucson. The heavily populated areas of Los Angeles/San Diego, San Francisco/Oakland, Chicago, Boston, New York, Washington D.C., Miami, etc... are clearly shown better. And look at Wyoming. Only two cities show up in this data.  
 
-In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. Optimization of this many sites might doable for advanced commercial optimization algorithms, but it is far too many for what we want to do and certainly too many for the Solver that comes with MS Excel.  
+In the above, AK and HI are removed. There are 1,001 cities in this data base with populations greater than 40,000. Optimization of this many cites might doable for advanced commercial optimization algorithms, but it is far too many for what we want to do for this project and certainly too many for the Solver that comes with MS Excel.  
 
 ### Modeling the Speedy Car Sales business    
 For this fictional sales company, it is in the early growth stage. 
@@ -427,7 +427,7 @@ We have identified the shipping cost function, but we didn't actually calculate 
 We need the distances between each city and a potential hub. For this trivial problem, we could probably just go to Google Maps or some similar website and find 9 distances from each city to Houston (distance to Houston from Houston = 0. :) But the cost isn't $0 in our model. There is a cost for loading and unloading at least.  
 For this problem, we will consider the shipping distance from in and around Houston to our hub in Houstan as 0 even though it wouldn't actually be that. But the minimum $100 should cover that.  
 Getting the distance from Google Maps for driving from New York to Houston and entering that data took about 20 seconds. Doing that 10 times isn't a big deal. But we need the distances between 50 cities.  That's 49 + 48 + 47 + 46... well, you get the idea.
-**Fortunately, there is an easier way: Google API https://cloud.google.com/maps-platform/**There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but **a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes. By "hand" would have taken 6-7 hours possibly.**    
+**Fortunately, there is an easier way: Google API https://cloud.google.com/maps-platform/** There are a number of others, such as Microsoft. We used Google. Our database actually needed the distance between each city and every other city, including itself, both ways. We could have calculated one way and manipulated the database and also entered 0's for each distance between a city and itself, but **a simple loop and a connection to Google API data made this easy. 2,500 data calls took about 2 minutes. By "hand" would have taken 6-7 hours possibly.**    
 Now we have the distance between each city and Houston (and every other data pair) and the cost function. We easily calculate the cost between each city.  
 
 #### Optimization in Excel  
@@ -441,7 +441,7 @@ Excel has solved this trivial problem at a cost of $2,318,286.98. You can see co
 #### Optimization in R  
 Below are the raw results from this problem solved via MILP optimization in R.  
 The first box shows that the solver found an optimal solution and what it is.  
-The second box are more formal results.  
+The second box has more formal results.  
 The third box shows the number of cars shipped between each city.  
 
 ```{r warning= FALSE, message = FALSE}
@@ -513,7 +513,7 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 ```
 
 ### Optimization between 10 cities and 2 hubs
-Here is our first true optimization problem. We have 10 metro areas, the cost to ship between each and Houston or Washington and the number of cars to be shipped. Here we will let the solver chose where each city will ship that give us the least expensive solution. The optimization write-up looks like this:
+Here is our first true optimization problem. We have 10 metro areas, the cost to ship between each and Houston or Washington and the number of cars to be shipped. Here we will let the solver chose which hub each city will ship to that will give us the least expensive solution. The optimization write-up looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
 $$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
@@ -797,9 +797,10 @@ As you can see, Excel can't do this. We have quickly reached the limit of what t
 
 ### 10 Cities, Choose 3 Hubs  
 Here we will keep using the same 10 large metro areas and choose the number of hubs we want to use. The number of hubs can be from 1 to 10. We randomly chose 3.  
+  
 #### Solution in R  
 
-The first box below has the "hubs" solution: New York, Los Angeles, and Dallas were chosen. The second box shows the number of cars shipped.  
+The first box below has the optimal cost soltion. The second has the "hubs" solution: New York, Los Angeles, and Dallas were chosen. The third box shows the number of cars shipped between each city and each hub.  
 
 
 ```{r warning= FALSE, message = FALSE}
@@ -946,14 +947,14 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
 
 
 ### 50 Cities, Chose 2 Hubs (1 Must Be Houston)  
-We are now using all of the 50 large metros areas we found earlier. We will model our growing car sales company. If their first hub was in Houston (and they don't want to move it at this time), where should the next hub be located.  
+We are now using all of the 50 large metros areas we found earlier. We will model our growing car sales company. If their first hub was in Houston (and they don't want to move it at this time), where should the next hub be located?  
   
 #### Solution in R  
 
 
 
 ```{r warning= FALSE, message = FALSE}
-# Choose more than two, any two
+# Choose  two, one must be Houston
 
 #### import data set ####
 library(scales)
@@ -963,14 +964,13 @@ library(tidyr)
 library(dplyr)
 # Read in .csv file and create Tibble DF.
 cities_raw <- read_csv("distances_my_top_50.csv")
-# Turn into a dataframe
+# Turn into a tibble dataframe
 city_data <- as_tibble(cities_raw)
 get_supply <- as_tibble(cities_raw)
 # Add a number for each city 1 to 50
 city_data <- city_data %>% 
   add_column(num.from = 0, .after = 4) %>% 
   add_column(num.to = 0, .after = 6)
-  
 # number from and to numbers
 xx <- 1
 for (ii in 1:50){
@@ -981,125 +981,59 @@ for (ii in 1:50){
   }
 }
 
-
 # Choose number of cities to use
 num_cities <- 50
-
-#data <- as.data.frame(Network_Modeling)
-# Get top six in each set of TO and FROM
-# city_data <- city_data %>% 
-#   group_by(num.from) %>%
-#   slice_min(order_by = num.from, n = num_cities) %>%
-#   group_by(num.to) %>%
-#   slice_min(order_by = num.to, n = num_cities) %>%
-#   arrange(num.from)
-
+# filter. But does nothing here as we are using max, 50, cities.
 city_data <- city_data %>% 
   group_by(num.from) %>%
   slice_head(n = num_cities) %>% 
   group_by(num.to) %>% 
   slice_head(n = num_cities) %>% 
   group_by(num.from)
-  
-
-# redo number of cars from each city
-# get supply
+# Get number of cars to ship
 num_cars_month <- 4000
-#library(dplyr)
+# Redo supply for each city based on the number of cars per month
 get_supply <- get_supply %>% 
   slice_head(n = num_cities) %>% 
-  #arrange(desc(Population)) %>% # sort Tibble by Population and descending
-  #slice_head(n = 11) %>% # Get only the first n rows.
   mutate(to_pop_ratio = to_population / sum(to_population)) %>% # percent of Population
   mutate(to_num_cars = round(to_pop_ratio * num_cars_month,0)) # Calc number cars moving each month
-
-# make into a cost matrix
+# make into a Shipping cost matrix
 cost <- city_data$cost
 cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
-
-library(ompr)
-library(magrittr)
 library(ROI)
 library(ROI.plugin.glpk)
 library(ompr)
 library(ompr.roi)
-# Shipping Cost
-# cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
-#           326.04,874.85,496.92,646.68,662.94,100.00,586.57,277.47,478.96,819.49)
-# cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
-# cost_m
 # Supply to move from each cities
-#supply <- as.vector(city_data$`Number of cars Shipped From`[1:6])
-# the above wasn't resized for 6 cities
 supply <- as.vector(get_supply$to_num_cars)
 
-# model <- MIPModel()  %>% 
-#   # Number of cars shiped from Xi to Xj
-#   add_variable(x[i,j], i = 1:6, j = 1:6, type = "integer", lb = 0) %>% 
-#   # Choose Houston (Y1) or Washington (Y2)
-#   add_variable(y[j], j = 1:6, type = "binary") %>% 
-#   #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
-#   # minimize shipping cost
-#   set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:6, j = 1:6), "min") %>% 
-#   # must use supply from each city
-#   
-#   ### fix this with J's, not 1 and 2
-#   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-#   # FIXED! works with j's
-#   add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
-#   # add this to keep Houston
-#   add_constraint(y[5] == 1) %>% 
-#   add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
-#   # add linking variables
-#   # 1500 because the new limit should be 1224
-#   add_constraint(x[i,j] <= 1500*y[j], i = 1:6, j = 1:6)
-# 
-# 
-# #result <- ROI_solve(model, solver = "glpk")
-# result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-# result
-# get_solution(result, x[i,j])
-# get_solution(result, y[j])
-
-
+# Choose number of hubs to model
 num_hubs <- 2
-
+# Make model
 model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
+  # Number of cars shipped from Xi to Xj
   add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
-  # Choose Houston (Y1) or Washington (Y2)
+  # Chosing hubs variable
   add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
-  #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
   # minimize shipping cost
   set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
   # must use supply from each city
-  
-  ### fix this with J's, not 1 and 2
-  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-  # FIXED! works with j's
   add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
-  # add this to keep Houston
+  # add this to keep Houston as a hub
   add_constraint(y[5] == 1) %>% 
+  # Choose max humber of hubs
   add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
-  # add linking variables
-  # 1500 because the new limit should be 1224
+  # To link variables X and Y
   add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
 
 
-#result <- ROI_solve(model, solver = "glpk")
+#Run model and get detailed result but don't display
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
+#Display optimal value
 result
-#get_solution(result, x[i,j])
-#get_solution(result, y[j])
-
-
-
-#cities_10 <- read_csv("distances_top_10.csv")
+# Work on solution
 solution <- as_tibble(get_solution(result, x[i,j]))
-#solution
-
-library(dplyr)
 # get hub solution
 solution_hub <- as_tibble(get_solution(result, y[j]))
 to.column <- as.vector(get_supply$to)
@@ -1108,9 +1042,10 @@ solution_hub <- solution_hub %>%
 solution_hub$Hub <- to.column
 solution_hub <- solution_hub %>% 
   filter(value > 0)
+# Display hub sultion
 solution_hub
 
-# Adds after the second column
+# Formatting solution
 solution <- solution %>%
   add_column(FROM_city = 0) %>% 
   add_column(TO_city = 0) %>% 
@@ -1119,7 +1054,7 @@ solution <- solution %>%
   add_column(lon.from = 0) %>%
   add_column(lat.from = 0)
 
-#m <- 1
+# Adding lat/longs
 for ( k in 1:length(city_data$lon.to)){
   solution$FROM_city[k] <- city_data$from[k]
   solution$lon.from[k] <- city_data$lon.from[k]
@@ -1127,310 +1062,26 @@ for ( k in 1:length(city_data$lon.to)){
   solution$TO_city[k] <- city_data$to[k]
   solution$lon.to[k] <- city_data$lon.to[k]
   solution$lat.to[k] <- city_data$lat.to[k]
-  #m < m + 1
-
 }
-#solution
-# from.column <- c(cities_10$to[1:10])
-# to.column <- c("Houston, Texas", "Washington, District of Columbia")
-# m <- 1
-# n <- 0
-# for (k in 1:2){
-#   for (l in 1:10){
-#     solution$FROM_city[m] <- from.column[l]
-#     solution$lon.from[m] <- cities_10$lon.to[l]
-#     solution$lat.from[m] <- cities_10$lat.to[l]
-#     solution$TO_city[m] <- to.column[k]
-#     solution$lon.to[m] <- cities_10$lon.to[5 + n]
-#     solution$lat.to[m] <- cities_10$lat.to[5 + n]
-#     m <- m + 1
-#   }
-#   n <- n + 1
-# }
-
-### This works!!!
-# no clean it up
+# clean up 0's
 solution <- solution %>% 
   filter(value > 0)
-
+# Work on displaying solution
 solution_display <- solution %>%
   filter(value > 0) %>%
   select(variable, i, j, value, FROM_city, TO_city)
+# Display solution
 solution_display
 
 #### now map it ####
 library(tidyverse)
-
-
-# "us.cities" in maps package contains This database is of us cities of population
-# greater than about 40,000. Also included are state capitals of any 
-# population size.
-# "state" database produces a map of the states of the United States
-# mainland generated from US De- partment of the Census data
 library(maps)
 
 # Read in 10 city data with distances made in "Get Distances"
 cities_10 <- read_csv("distances_top_10.csv")
-
 # Get states for plotting state map
 us_states <- as_tibble(map_data("state"))
-
-
-ggplot(data = us_states, mapping = aes(x = long, y = lat,
-                                       group = group)) +
-  geom_polygon(fill= "white", color = "black") +
-  geom_point(data = city_data, aes( x = lon.from, y = lat.from,
-                                    size = from_population, color = "purple", alpha = 0.5),
-             inherit.aes = FALSE) +
-  geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
-  geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
-                                    yend = lat.to), color = "blue", size = 0.3,
-               arrow = arrow(), inherit.aes = FALSE) +
-  guides(alpha = FALSE) +
-  guides(color = FALSE) +
-  scale_size("Population", labels = comma) +
-  #scale_color_gradient2(midpoint=6500000,
-  #                    low="blue", high="red" ) +
-
-  #coord_map("bonne", parameters=45) +
-  ggthemes::theme_map() +
-
-  labs(title = "Visual Solution for 50 Cities and 2 Hubs (1 == Houston)")+
-  coord_map("bonne", parameters=45)
-
-```
-
-
-
-### 50 Cities, Chose Any 3 Hubs  
-
-#### Solution in R  
-
-
-```{r warning= FALSE, message = FALSE}
-# Choose more than two, any two
-
-#### import data set ####
-library(readr)
-library(tidyr)
-library(dplyr)
-# Read in .csv file and create Tibble DF.
-cities_raw <- read_csv("distances_my_top_50.csv")
-# Turn into a dataframe
-city_data <- as_tibble(cities_raw)
-get_supply <- as_tibble(cities_raw)
-# Add a number for each city 1 to 50
-city_data <- city_data %>% 
-  add_column(num.from = 0, .after = 4) %>% 
-  add_column(num.to = 0, .after = 6)
-  
-# number from and to numbers
-xx <- 1
-for (ii in 1:50){
-  for (jj in 1:50) {
-    city_data$num.from[xx] <- ii
-    city_data$num.to[xx] <- jj
-    xx <- xx + 1
-  }
-}
-
-
-# Choose number of cities to use
-num_cities <- 50
-
-#data <- as.data.frame(Network_Modeling)
-# Get top six in each set of TO and FROM
-# city_data <- city_data %>% 
-#   group_by(num.from) %>%
-#   slice_min(order_by = num.from, n = num_cities) %>%
-#   group_by(num.to) %>%
-#   slice_min(order_by = num.to, n = num_cities) %>%
-#   arrange(num.from)
-
-city_data <- city_data %>% 
-  group_by(num.from) %>%
-  slice_head(n = num_cities) %>% 
-  group_by(num.to) %>% 
-  slice_head(n = num_cities) %>% 
-  group_by(num.from)
-  
-
-# redo number of cars from each city
-# get supply
-num_cars_month <- 4000
-#library(dplyr)
-get_supply <- get_supply %>% 
-  slice_head(n = num_cities) %>% 
-  #arrange(desc(Population)) %>% # sort Tibble by Population and descending
-  #slice_head(n = 11) %>% # Get only the first n rows.
-  mutate(to_pop_ratio = to_population / sum(to_population)) %>% # percent of Population
-  mutate(to_num_cars = round(to_pop_ratio * num_cars_month,0)) # Calc number cars moving each month
-
-# make into a cost matrix
-cost <- city_data$cost
-cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
-
-
-library(ompr)
-library(magrittr)
-library(ROI)
-library(ROI.plugin.glpk)
-library(ompr)
-library(ompr.roi)
-# Shipping Cost
-# cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
-#           326.04,874.85,496.92,646.68,662.94,100.00,586.57,277.47,478.96,819.49)
-# cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
-# cost_m
-# Supply to move from each cities
-#supply <- as.vector(city_data$`Number of cars Shipped From`[1:6])
-# the above wasn't resized for 6 cities
-supply <- as.vector(get_supply$to_num_cars)
-
-# model <- MIPModel()  %>% 
-#   # Number of cars shiped from Xi to Xj
-#   add_variable(x[i,j], i = 1:6, j = 1:6, type = "integer", lb = 0) %>% 
-#   # Choose Houston (Y1) or Washington (Y2)
-#   add_variable(y[j], j = 1:6, type = "binary") %>% 
-#   #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
-#   # minimize shipping cost
-#   set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:6, j = 1:6), "min") %>% 
-#   # must use supply from each city
-#   
-#   ### fix this with J's, not 1 and 2
-#   #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-#   # FIXED! works with j's
-#   add_constraint(sum_expr(x[i, j], j = 1:6) >= supply[i], i = 1:6) %>% 
-#   # add this to keep Houston
-#   add_constraint(y[5] == 1) %>% 
-#   add_constraint(sum_expr(y[j], j = 1:6) == 2) %>% 
-#   # add linking variables
-#   # 1500 because the new limit should be 1224
-#   add_constraint(x[i,j] <= 1500*y[j], i = 1:6, j = 1:6)
-# 
-# 
-# #result <- ROI_solve(model, solver = "glpk")
-# result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
-# result
-# get_solution(result, x[i,j])
-# get_solution(result, y[j])
-
-
-num_hubs <- 3
-
-model <- MIPModel()  %>% 
-  # Number of cars shiped from Xi to Xj
-  add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
-  # Choose Houston (Y1) or Washington (Y2)
-  add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
-  #add_variable(y[j], j = 1:2, type = "integer", lb = 0, ub = 1)
-  # minimize shipping cost
-  set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
-  # must use supply from each city
-  
-  ### fix this with J's, not 1 and 2
-  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-  # FIXED! works with j's
-  add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
-  # add this to keep Houston
-  #add_constraint(y[5] == 1) %>% 
-  add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
-  # add linking variables
-  # 1500 because the new limit should be 1224
-  add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
-
-
-#result <- ROI_solve(model, solver = "glpk")
-result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
-result
-#get_solution(result, x[i,j])
-#get_solution(result, y[j])
-
-
-
-#cities_10 <- read_csv("distances_top_10.csv")
-solution <- as_tibble(get_solution(result, x[i,j]))
-#solution
-
-library(dplyr)
-# get hub solution
-solution_hub <- as_tibble(get_solution(result, y[j]))
-to.column <- as.vector(get_supply$to)
-solution_hub <- solution_hub %>% 
-  add_column(Hub = 0)
-solution_hub$Hub <- to.column 
-solution_hub <- solution_hub %>% 
-  filter(value > 0)
-solution_hub
-
-# Adds after the second column
-solution <- solution %>%
-  add_column(FROM_city = 0) %>% 
-  add_column(TO_city = 0) %>% 
-  add_column(lon.to = 0) %>%
-  add_column(lat.to = 0) %>%
-  add_column(lon.from = 0) %>%
-  add_column(lat.from = 0)
-
-#m <- 1
-for ( k in 1:length(city_data$lon.to)){
-  solution$FROM_city[k] <- city_data$from[k]
-  solution$lon.from[k] <- city_data$lon.from[k]
-  solution$lat.from[k] <- city_data$lat.from[k]
-  solution$TO_city[k] <- city_data$to[k]
-  solution$lon.to[k] <- city_data$lon.to[k]
-  solution$lat.to[k] <- city_data$lat.to[k]
-  #m < m + 1
-
-}
-#solution
-# from.column <- c(cities_10$to[1:10])
-# to.column <- c("Houston, Texas", "Washington, District of Columbia")
-# m <- 1
-# n <- 0
-# for (k in 1:2){
-#   for (l in 1:10){
-#     solution$FROM_city[m] <- from.column[l]
-#     solution$lon.from[m] <- cities_10$lon.to[l]
-#     solution$lat.from[m] <- cities_10$lat.to[l]
-#     solution$TO_city[m] <- to.column[k]
-#     solution$lon.to[m] <- cities_10$lon.to[5 + n]
-#     solution$lat.to[m] <- cities_10$lat.to[5 + n]
-#     m <- m + 1
-#   }
-#   n <- n + 1
-# }
-
-### This works!!!
-# no clean it up
-solution <- solution %>%
-  filter(value > 0)
-#solution
-### This works!!!
-# no clean it up
-solution_display <- solution %>%
-  filter(value > 0) %>%
-  select(variable, i, j, value, FROM_city, TO_city)
-solution_display
-
-#### now map it ####
-library(tidyverse)
-
-
-# "us.cities" in maps package contains This database is of us cities of population
-# greater than about 40,000. Also included are state capitals of any 
-# population size.
-# "state" database produces a map of the states of the United States
-# mainland generated from US De- partment of the Census data
-library(maps)
-
-# Read in 10 city data with distances made in "Get Distances"
-cities_10 <- read_csv("distances_top_10.csv")
-
-# Get states for plotting state map
-us_states <- as_tibble(map_data("state"))
-
-
+# Plot
 ggplot(data = us_states, mapping = aes(x = long, y = lat,
                                        group = group)) +
   geom_polygon(fill= "white", color = "black") +
@@ -1444,18 +1095,165 @@ ggplot(data = us_states, mapping = aes(x = long, y = lat,
   guides(alpha = FALSE) +
   guides(color = FALSE) +
   scale_size("Population", labels = comma) +
-  #scale_color_gradient2(midpoint=6500000,
-  #                    low="blue", high="red" ) +
-
-  #coord_map("bonne", parameters=45) +
   ggthemes::theme_map() +
-
-  labs(title = "Visual Solution for 50 Cities and 3 Hubs")+
+  labs(title = "Visual Solution for 50 Cities and 2 Hubs (1 == Houston)")+
   coord_map("bonne", parameters=45)
-
 ```
 
 
+
+### 50 Cities, Chose Any 3 Hubs  
+  
+We use the same 50 cities and let the Solver chose any three cities that will minimize cost.  
+  
+
+#### Solution in R  
+
+
+```{r warning= FALSE, message = FALSE}
+# Choose 50 cities and 3 hubs
+
+#### import data set ####
+library(tidyverse)
+library(readr)
+library(tidyr)
+library(dplyr)
+# Read in .csv file and create Tibble DF.
+cities_raw <- read_csv("distances_my_top_50.csv")
+# Turn into a tibble dataframe
+city_data <- as_tibble(cities_raw)
+get_supply <- as_tibble(cities_raw)
+# Add a number for each city 1 to 50
+city_data <- city_data %>% 
+  add_column(num.from = 0, .after = 4) %>% 
+  add_column(num.to = 0, .after = 6)
+# number from and to numbers
+xx <- 1
+for (ii in 1:50){
+  for (jj in 1:50) {
+    city_data$num.from[xx] <- ii
+    city_data$num.to[xx] <- jj
+    xx <- xx + 1
+  }
+}
+
+# Choose number of cities to use
+num_cities <- 50
+# filter out extra cities if using less than 50
+city_data <- city_data %>% 
+  group_by(num.from) %>%
+  slice_head(n = num_cities) %>% 
+  group_by(num.to) %>% 
+  slice_head(n = num_cities) %>% 
+  group_by(num.from)
+  
+
+# get number of cars to ship each month
+num_cars_month <- 4000
+# redo number of cars from each city
+get_supply <- get_supply %>% 
+  slice_head(n = num_cities) %>% 
+  mutate(to_pop_ratio = to_population / sum(to_population)) %>% # percent of Population
+  mutate(to_num_cars = round(to_pop_ratio * num_cars_month,0)) # Calc number cars moving each month
+
+# make into a cost matrix
+cost <- city_data$cost
+cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
+
+library(ROI)
+library(ROI.plugin.glpk)
+library(ompr)
+library(ompr.roi)
+# Make number of cars to ship into a supply vector
+supply <- as.vector(get_supply$to_num_cars)
+# get input: number of hubs to model
+num_hubs <- 3
+
+model <- MIPModel()  %>% 
+  # Number of cars shipped from Xi to Xj
+  add_variable(x[i,j], i = 1:length(supply), j = 1:length(supply), type = "integer", lb = 0) %>% 
+  # hubs chosen
+  add_variable(y[j], j = 1:length(supply), type = "binary") %>% 
+  # minimize shipping cost
+  set_objective(sum_expr(cost_6_city[i,j] * x[i,j], i = 1:length(supply), j = 1:length(supply)), "min") %>% 
+  # must use supply from each city
+  add_constraint(sum_expr(x[i, j], j = 1:length(supply)) >= supply[i], i = 1:length(supply)) %>% 
+  # Must use number of hubs 
+  add_constraint(sum_expr(y[j], j = 1:length(supply)) == num_hubs) %>% 
+  # add contraint linking variables X and Y
+  add_constraint(x[i,j] <= max(supply)*y[j], i = 1:length(supply), j = 1:length(supply))
+
+#Run model, get detailed results, but don't display
+result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
+#Display optimal value
+result
+# Working nice solution
+solution <- as_tibble(get_solution(result, x[i,j]))
+# get hub solution
+solution_hub <- as_tibble(get_solution(result, y[j]))
+to.column <- as.vector(get_supply$to)
+solution_hub <- solution_hub %>% 
+  add_column(Hub = 0)
+solution_hub$Hub <- to.column 
+# filter out 0's
+solution_hub <- solution_hub %>% 
+  filter(value > 0)
+# Display hub solution
+solution_hub
+
+# Make solution df
+# Adds after the second column
+solution <- solution %>%
+  add_column(FROM_city = 0) %>% 
+  add_column(TO_city = 0) %>% 
+  add_column(lon.to = 0) %>%
+  add_column(lat.to = 0) %>%
+  add_column(lon.from = 0) %>%
+  add_column(lat.from = 0)
+
+for ( k in 1:length(city_data$lon.to)){
+  solution$FROM_city[k] <- city_data$from[k]
+  solution$lon.from[k] <- city_data$lon.from[k]
+  solution$lat.from[k] <- city_data$lat.from[k]
+  solution$TO_city[k] <- city_data$to[k]
+  solution$lon.to[k] <- city_data$lon.to[k]
+  solution$lat.to[k] <- city_data$lat.to[k]
+}
+#Clean up solution, no 0's
+solution <- solution %>%
+  filter(value > 0)
+# Work displaying solution
+solution_display <- solution %>%
+  filter(value > 0) %>%
+  select(variable, i, j, value, FROM_city, TO_city)
+#Display solution
+solution_display
+
+#### now map it ####
+library(maps)
+
+# Read in 10 city data with distances made in "Get Distances"
+cities_10 <- read_csv("distances_top_10.csv")
+# Get states for plotting state map
+us_states <- as_tibble(map_data("state"))
+# Plot
+ggplot(data = us_states, mapping = aes(x = long, y = lat,
+                                       group = group)) +
+  geom_polygon(fill= "white", color = "black") +
+  geom_point(data = city_data, aes( x = lon.from, y = lat.from,
+                                    size = from_population, color = "purple", alpha = 0.5),
+             inherit.aes = FALSE) +
+  geom_text(data = city_data, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  geom_segment(data = solution, aes(x = lon.from, y = lat.from, xend = lon.to,
+                                    yend = lat.to), color = "blue", size = 0.3,
+               arrow = arrow(), inherit.aes = FALSE) +
+  guides(alpha = FALSE) +
+  guides(color = FALSE) +
+  scale_size("Population", labels = comma) +
+  ggthemes::theme_map() +
+  labs(title = "Visual Solution for 50 Cities and 3 Hubs")+
+  coord_map("bonne", parameters=45)
+```
 
 
 
@@ -1470,7 +1268,7 @@ What if we add a cost function for the actual hub? How will that affect the outc
 Two additional shipping cost functions were tried as shown below:  
 $$Cost(Dollars) = 150 + 150\sqrt{miles}$$  
 $$Cost(Dollars) = 50 + 50\sqrt{miles}$$  
-There will be referred to as: "High" and "Low".  And the original "Med" shown below:
+They will be referred to as: "High" and "Low".  And the original "Med" shown below:
 $$Cost(Dollars) = 100 + 100\sqrt{miles}$$  
 
 For a hub rental function, the following might be needed:  
@@ -1482,7 +1280,8 @@ Foreman offices: 30' by 30'
 20 workdays a month
 
 $$B = 20*30*\frac{N_{cars}}{2} + 15*30*\frac{N_{cars}}{2} + 20*30*2*\frac{N_{cars}}{10} + 20*30*\frac{N_{cars}}{4} + 30*30$$
-~ where $B$ = sqft of building needed, $N_{cars}$ = number of cars per month/20, [rounded up to next whole number for each work case].  
+~ where $B$ = sqft of building needed, $N_{cars}$ = number of cars per month/20, [rounded up to next whole number for each work day, 20 workdays per month].  
+  
 A quick search for leasing auto mechanical space in Maryland yielded rates between 75cents/sqft to $3/sqft. We'll used three levels:
 High: $3 per sqft
 Med: $1.75 per sqft
@@ -1493,14 +1292,14 @@ A similar method was used to for the laborers. And a rate adjustment was used wh
 
 ## Calculations  
 450 calculations were planned. For a dataset with 50 metro areas, an optimization would be done for each solution of the number of hubs from 1 to 50. Then, for each solution, the 3 different shipping costs. And, for those, the 3 different Rent/Labor rates.  
-That's 50 * 3 * 3 = 450  
+That's 50 * 3 * 3 = 450.  
 
 ### Houston, we have a problem...  
-As it turns out, the 2015 Macbook used wasn't fully up to the task. Significant more time was needed to solve problems with 50 metro areas and up to 50 hubs. 1 hub solved in about 1 minute. 2 hubs needed about 10 minutes. 3 hubs - 35 minutes. 4 hubs - well over an hour. For 5 hubs, the solver appeared to be about 40% complete at 3 hours and the calculation was stopped. It just wasn't reasonable to keep going.  
-Fortunately, 25 metros and up to 25 hubs was significantly quicker. The total time for these smaller optimizations was just over two hours.  
-A plot of the outcomes is below.  
+As it turns out, the 2015 Macbook used wasn't fully up to the task. Significantly more time was needed to solve problems with 50 metro areas and up to 50 hubs. 1 hub solved in about 1 minute. 2 hubs needed about 10 minutes. 3 hubs - 35 minutes. 4 hubs - well over an hour. For 5 hubs, the solver appeared to be about 40% complete at 3 hours and the calculation was stopped. It just wasn't reasonable to keep going.  
+Fortunately, 25 metros and up to 25 hubs was significantly quicker. The total time for these smaller optimization runs was just over two hours.  
+A plot of the outcomes with the different shippping costs and rent/labor costs is below.  
 
-#### Plot output
+#### Plot output for 25 Cities and 1 to 25 Hubs
 
 ```{r warning= FALSE, message = FALSE}
 final2 <- read_csv("25_city_results_to_plot.csv")
@@ -1524,7 +1323,7 @@ The amount of Rent & Labor Costs to operate each hub clearly matter in this mode
 As shipping costs appear to matter less than rent and labor costs, it might be beneficial to next look at finding locations where the rent and labor rates are lowest. Would an area in middle Pennsylvania be a better location due to reduced hub expenses than placing a hub in New York, Philadelphia, Baltimore, or Washington D.C. even though there might be a slight increase in shipping costs. Probably so.  
 
 #### Main Observation  
-Cost of the operation of the hubs is more of a factor in changing costs than shipping. [As modeled.]  
+Changing the cost of operating of the hubs is more of a factor than changing costs of shipping. [As modeled.]  
 
 
 #### Notes:  
@@ -1538,7 +1337,7 @@ Cost of the operation of the hubs is more of a factor in changing costs than shi
 2) Webscrape, or develop another model, to get more accurate shipping costs.  
 3) Get more accurate rent and labor costs.  
 4) Include upfront capital outlays in the costs for a certain period of time, such as 5 years.  
-5) Include a much more accurate estimate of the rent/labor of a metro area in the optimization function. This is much more complex but could perhaps result in different outcomes. For example, if Philadelphia is much less expensive than New York, Philadelphia might be a hub chosen over New York.  
+5) Include a much more accurate estimate of the rent/labor of a metro area in the actual optimization function. This is much more complex but could perhaps result in different outcomes. For example, if Philadelphia is much less expensive than New York, Philadelphia might be a hub chosen over New York even though New York had a lot more cars.  
 6) Link up with a much more powerful computer to do bigger and bigger datasets to get more and more fidelity. Online cloud computing would be the next step. 
 7) Include sales growth projections in the modeling.  
 8) Include sensitivity analysis of the growth projections.  

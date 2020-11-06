@@ -481,35 +481,40 @@ solution
 
 ```{r warning= FALSE, message = FALSE}
 library(ggmap)
+# Plot map
+# Get us_states for states outline
 ggplot(data = us_states, mapping = aes(x = long, y = lat,
                                        group = group)) +
+  #black state outline and white fill
   geom_polygon(fill= "white", color = "black") +
+  #print 10 cities based on lat/long
   geom_point(data = cities_10, aes( x = lon.from, y = lat.from,
                                     size = from_population, color = "purple", alpha = 0.5),
              inherit.aes = FALSE) +
+  #add city labels
   geom_text(data = cities_10, aes(x = lon.from, y = lat.from, label = from.short), size = 3, inherit.aes = FALSE) +
+  #move legend to bottom
   theme(legend.position="bottom") +
+  #make arrows between from and to cities and hubs
   geom_segment(data = cities_10, aes(x = lon.from, y = lat.from, xend = lon.to[5],
                                         yend = lat.to[5]), color = "blue", size = 0.3,
                arrow = arrow(), inherit.aes = FALSE) +
+  #remove alpha and color from legend
   guides(alpha = FALSE) +
   guides(color = FALSE) +
+  #add commas in numbers
   scale_size("Population", labels = comma) +
-  #scale_color_gradient2(midpoint=6500000,
-  #                    low="blue", high="red" ) +
-  
-  #coord_map("bonne", parameters=45) + 
+  #use a good themed map from ggplot2
   ggthemes::theme_map() +
   labs(title = "Visual of Solution Showing Arrows Indicating Shipping") +
+  #mercator projection
   coord_map("bonne", parameters=45)
-
-
 ```
 
 ### Optimization between 10 cities and 2 hubs
 Here is our first true optimization problem. We have 10 metro areas, the cost to ship between each and Houston or Washington and the number of cars to be shipped. Here we will let the solver chose where each city will ship that give us the least expensive solution. The optimization write-up looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
-$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
+$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
 $$X \in Integers$$
@@ -523,46 +528,39 @@ Excel has solved this problem at a cost of $1,634,915.13. You can see cost to sh
 #### Solution in R  
 
 The first box below shows the optimal solution as cost in dollars to ship each month.  
-The second box shows the raw result for each city to hub pair. Right now, there are only 20 options. Row 2 has X, i=2, j=1, value = 614. This means 614 cars shipped from Los Angeles metro area (i=2) to Houston (j=1). This will get overwhelmning with larger problems so this format won't be shown again.  
+The second box shows the raw result for each city to hub pair. Right now, there are only 20 options. Row 2 has X, i=2, j=1, value = 614. This means 614 cars shipped from Los Angeles metro area (i=2) to Houston (j=1). *This will get overwhelming with larger problems so this format won't be shown again.*  
 The third box is the shipping solution cleaned up a bit.  
 ```{r warning= FALSE, message = FALSE}
 library(tidyverse)
 library(scales)
-library(ompr)
-library(magrittr)
+# library(ompr)
+# library(magrittr)
 library(ROI)
 library(ROI.plugin.glpk)
 library(ompr)
 library(ompr.roi)
-# Shipping Cost
+# Manual Shipping Costs entered
 cost <- c(705.04,690.03,593.44,332.01,100.00,662.94,617.15,689.96,522.36,614.42,
           326.04,874.85,496.92,646.68,662.94,100.00,586.57,277.47,478.96,819.49)
+#Blank matrix
 cost_m <- matrix(cost, nrow = 10, byrow = FALSE)
-#cost_m
 # Supply to move from each cities
 supply <- c(893,614,440,352,328,292,287,284,280,230)
-
+# Make the optimization model
 model <- MIPModel()  %>% 
   # Number of cars shiped from Xi to Xj
   add_variable(x[i,j], i = 1:10, j = 1:2, type = "integer", lb = 0) %>% 
   # minimize shipping cost
   set_objective(sum_expr(cost_m[i,j] * x[i,j], i = 1:10, j = 1:2), "min") %>% 
   # must use supply from each city
-  
-  
-  ### fix this with J's, not 1 and 2
-  #add_constraint(x[i, 1] + x[i, 2] >= supply[i], i = 1:10) #%>%
-  # FIXED! works with j's
   add_constraint(sum_expr(x[i, j], j = 1:2) >= supply[i], i = 1:10) #%>% 
-# use only one Y
-#add_constraint(sum_expr(y[j], j = 1:2) == 1) %>% 
-# add linking variables
-
-#result <- ROI_solve(model, solver = "glpk")
+#Run model and don't display most info.
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = FALSE))
+#Display optimal value
 result
+#Display X variable solutions
 get_solution(result, x[i,j])
-temp_df <- as_tibble(get_solution(result, x[i,j]))
+#temp_df <- as_tibble(get_solution(result, x[i,j]))
 #temp_df
 ### This works!!
 
@@ -659,10 +657,10 @@ In case you were wondering, the distance from Miami to Washington D.C. is 1,058 
 
 Next we are going to still use Houston and Washington as our two hub options, but we will make the solver choose ONLY one of the two. The optimization problem looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{2}C_{i,j}X_{i,j}$$
-$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
-$$ \sum_{j=1}^{2}Y_j=1$$
+$$st: \sum_{j=1}^{2}X_{i,j} \ge S_i,~~~\forall i=1~to~10,~~~\forall j=1~to~2$$
+$$ \sum_{j=1}^{2}Y_j=1,~~~\forall j=1~to~2$$
 $$X_{i,j} \le MAX(S)*Y_j,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
-$$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
+$$X_{i,j} \ge 0,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~2$$
 
 $$X \in Integers$$
 $$ Y \in 0~or~1$$
@@ -825,8 +823,8 @@ Now we have our basic ideas down, we can scale up. We can set up to choose the n
 
 The optimization problem looks like this:
 $$min\sum_{i=1}^{10} \sum_{j=1}^{10}C_{i,j}X_{i,j}$$
-$$st: \sum_{j=1}^{10}X_{i,j} \ge S_i~~~\forall i=1~to~10$$
-$$ \sum_{j=1}^{10}Y_j=NumHubs$$
+$$st: \sum_{j=1}^{10}X_{i,j} \ge S_i,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~10$$
+$$ \sum_{j=1}^{10}Y_j=NumHubs,~~~\forall j,~j=1~to~10$$
 $$X_{i,j} \le MAX(S)*Y_j,~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~10$$
 $$X_{i,j} \ge 0~~~\forall i,~i=1~to~10,~~~\forall j,~j=1~to~10$$
 

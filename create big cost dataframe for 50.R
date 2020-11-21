@@ -17,15 +17,15 @@ library(ompr.roi)
 # 3 rent functions
 # 3 cost miles functions
 # 50 hubs
-final <- as.data.frame(matrix(0, ncol = 80, nrow = 225))
+final <- as.data.frame(matrix(0, ncol = 155, nrow = 225))
 names(final)[1] <- "rent.func"
 names(final)[2] <- "miles.func"
 names(final)[3] <- "cost"
 names(final)[4] <- "num.hubs"
 names(final)[5] <- "Hubs.used"
-names(final)[30] <- "cars.shipped"
-names(final)[55] <- "cost.hubs"
-names(final)[80] <- "total.cost"
+names(final)[55] <- "cars.shipped"
+names(final)[105] <- "cost.hubs"
+names(final)[155] <- "total.cost"
 
 # Read in .csv file and create Tibble DF.
 cities_raw <- read_csv("distances_my_top_50.csv")
@@ -54,7 +54,8 @@ for (ii in 1:50){
   }
 }
 
-num_cities <- 25
+num_cities <- 50
+#below not need for 50. Only anything less than 50.
 city_data <- city_data %>% 
   group_by(num.from) %>%
   slice_head(n = num_cities) %>% 
@@ -100,7 +101,9 @@ cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
 
 row <-1
-for (num_hubs in 1:25){
+num_hubs <-1
+# 1 to 49 hubs by twos
+for (num_hubs_counter in 1:25){
   #num_hubs <-1
   model <- MIPModel()  %>% 
     # Number of cars shiped from Xi to Xj
@@ -155,14 +158,15 @@ for (num_hubs in 1:25){
     final$cost[row] <- result[2]
     final$num.hubs[row] <- num_hubs
     
-    for (col in 1:25) {
+    for (col in 1:50) {
       final[row,4+col] <- solution_hub$value[col]
-      final[row,29+col] <- solution$value[col]
+      final[row,54+col] <- solution$value[col]
       
     }
     row <- row + 1
   }
   #row <- row + 1
+  num_hubs <- num_hubs + 2
 }
 
 ##### FOR high cost per mile
@@ -173,7 +177,8 @@ cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
 
 row <-76
-for (num_hubs in 1:25){
+num_hubs <-1
+for (num_hubs_counter in 1:25){
   #num_hubs <-1
   model <- MIPModel()  %>% 
     # Number of cars shiped from Xi to Xj
@@ -228,14 +233,15 @@ for (num_hubs in 1:25){
     final$cost[row] <- result[2]
     final$num.hubs[row] <- num_hubs
     
-    for (col in 1:25) {
+    for (col in 1:50) {
       final[row,4+col] <- solution_hub$value[col]
-      final[row,29+col] <- solution$value[col]
+      final[row,54+col] <- solution$value[col]
       
     }
     row <- row + 1
   }
   #row <- row + 1
+  num_hubs <- num_hubs + 2
 }
 
 
@@ -247,7 +253,8 @@ cost_6_city <- matrix(cost, nrow = num_cities, byrow = FALSE)
 
 
 row <-151
-for (num_hubs in 1:25){
+num_hubs <-1
+for (num_hubs_counter in 1:25){
   #num_hubs <-1
   model <- MIPModel()  %>% 
     # Number of cars shiped from Xi to Xj
@@ -302,14 +309,15 @@ for (num_hubs in 1:25){
     final$cost[row] <- result[2]
     final$num.hubs[row] <- num_hubs
     
-    for (col in 1:25) {
+    for (col in 1:50) {
       final[row,4+col] <- solution_hub$value[col]
-      final[row,29+col] <- solution$value[col]
+      final[row,54+col] <- solution$value[col]
       
     }
     row <- row + 1
   }
   #row <- row + 1
+  num_hubs <- num_hubs + 2
 }
 final <- as.data.frame(final)
 
@@ -321,7 +329,7 @@ for (fix in 1:225){
   final$newcost[fix] <- final[fix,3][[1]]
 }
 final2 <- final[ -c(3) ]
-write_csv(final2,"25_city_results.csv")
+write_csv(final2,"50_city_results.csv")
 
 
 
@@ -333,11 +341,11 @@ write_csv(final2,"25_city_results.csv")
 #   add_column(num.from = 0, .after = 4) %>% 
 #   add_column(num.to = 0, .after = 6)
 ### Fix H, M, L for cost column
-final2 <- read_csv("25_city_results.csv")
+final2 <- read_csv("50city_results.csv")
 final2 <- as_tibble(final2)
 final2 <- final2 %>% 
-  add_column(total.rent = 0, .after = 80) %>% 
-  add_column(total.labor = 0, .after = 81)
+  add_column(total.rent = 0, .after = 155) %>% 
+  add_column(total.labor = 0, .after = 156)
 # for (fix2 in 151:225){
 #   final2$miles.func[fix2] <- "L"
 # }

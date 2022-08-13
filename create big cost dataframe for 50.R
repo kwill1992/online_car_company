@@ -7,7 +7,7 @@
 
 library(tidyverse)
 #library(ompr)
-#library(magrittr)
+library(magrittr)
 library(ROI)
 library(ROI.plugin.glpk)
 library(ompr)
